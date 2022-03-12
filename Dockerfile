@@ -19,10 +19,13 @@ RUN apt update && apt install -y \
     libssh-dev \
     make \
     libcurl3-dev \
-    libgmp-dev
+    libgmp-dev \
+    libpq-dev
+
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
 
 RUN docker-php-ext-install \
-    pdo_mysql \
+    pdo_pgsql \
     zip \
     bcmath \
     intl \
