@@ -12,16 +12,12 @@ use Gedmo\Mapping\Annotation as Gedmo;
  */
 trait TimestampTrait
 {
-    /**
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime_immutable")
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(type: 'datetime_immutable')]
     protected DateTimeImmutable $createdAt;
 
-    /**
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(type: 'datetime')]
     protected DateTime $updatedAt;
 
     public function getCreatedAt(): DateTimeImmutable
