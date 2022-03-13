@@ -1,4 +1,4 @@
-FROM php:8-fpm-bullseye
+FROM php:8.1-fpm-bullseye
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
