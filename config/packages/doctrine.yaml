@@ -2,6 +2,7 @@ doctrine:
     dbal:
         charset: utf8mb4
         url: '%env(resolve:DATABASE_URL)%'
+        schema_filter: '~^(?!messenger_messages|lock_keys)~'
         options:
             1002: 'SET sql_mode=(SELECT REPLACE(@@sql_mode, "ONLY_FULL_GROUP_BY", ""))'
 

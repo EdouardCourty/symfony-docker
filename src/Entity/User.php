@@ -5,12 +5,14 @@ namespace App\Entity;
 use App\Entity\Utils\TimestampTrait;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
+use Symfony\Component\Uid\Ulid;
 use InvalidRoleException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
+#[ORM\Table(name: 'app_user')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use TimestampTrait;
@@ -18,15 +20,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const ROLE_USER = 'ROLE_USER';
     public const ROLE_ADMIN = 'ROLE_ADMIN';
 
+    public const ROLE_DEFAULT = self::ROLE_USER;
+
     public const ROLES = [
         self::ROLE_USER,
         self::ROLE_ADMIN
     ];
 
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id;
+    #[ORM\Column(type: 'ulid', unique: true)]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
+    private Ulid $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     private string $username;
@@ -42,7 +47,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->getUserIdentifier();
     }
 
-    public function getId(): ?int
+    public function getId(): Ulid
     {
         return $this->id;
     }
@@ -74,7 +79,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = self::ROLE_DEFAULT;
 
         return array_unique($roles);
     }
