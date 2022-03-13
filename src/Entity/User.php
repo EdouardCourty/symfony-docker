@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\Utils\TimestampTrait;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidRoleException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -13,6 +14,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use TimestampTrait;
+
+    public const ROLE_USER = 'ROLE_USER';
+    public const ROLE_ADMIN = 'ROLE_ADMIN';
+
+    public const ROLES = [
+        self::ROLE_USER,
+        self::ROLE_ADMIN
+    ];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -27,6 +36,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string')]
     private string $password;
+
+    public function __toString(): string
+    {
+        return $this->getUserIdentifier();
+    }
 
     public function getId(): ?int
     {
@@ -46,8 +60,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * A visual identifier that represents this user.
-     *
      * @see UserInterface
      */
     public function getUserIdentifier(): string
@@ -65,6 +77,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
+    }
+
+    /**
+     * @throws InvalidRoleException
+     */
+    public function addRole(string $roleString): self
+    {
+        if (in_array($roleString, self::ROLES, true)) {
+            $this->roles[] = $roleString;
+
+            return $this;
+        }
+
+        throw InvalidRoleException::createFromUserAndRole($this, $roleString);
+    }
+
+    public function hasRole(string $wantedRole): bool
+    {
+        return in_array($wantedRole, $this->roles, true);
+    }
+
+    public function removeRole(string $roleString): self
+    {
+        $this->roles = array_filter($this->roles, static function ($value) use ($roleString) {
+            return $value !== $roleString;
+        });
+
+        return $this;
     }
 
     public function setRoles(array $roles): self
