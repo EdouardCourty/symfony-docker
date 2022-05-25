@@ -28,6 +28,9 @@ dk-vendor:
 dk-cache-clear:
 	$(DKC) exec server bash -c "bin/console cache:clear"
 
+dk-fix-style:
+	$(DKC) exec server bash -c "vendor/bin/phpcs --standard=PSR12 --extensions=php -n src"
+
 _drop-database:
 	$(BCL) doctrine:database:drop --force
 
