@@ -1,5 +1,0 @@
-User-agent: *
-Disallow: /wallet
-Allow: /
-
-Sitemap: https://imxrarity.io/sitemap.xml
