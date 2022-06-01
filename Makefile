@@ -19,9 +19,6 @@ dk-restart: dk-up
 dk-bash-php:
 	$(DKC) exec server bash
 
-dk-bash-mysql:
-	$(DKC) exec database bash
-
 dk-vendor:
 	$(DKC) exec server bash -c "composer install"
 
