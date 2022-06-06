@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3452b357a14dce01df116acf3ab96eb6",
+    "content-hash": "1e1716a20bdafcecc4a58bfa407dc6d2",
     "packages": [
         {
             "name": "beberlei/doctrineextensions",
@@ -3209,28 +3209,28 @@
         },
         {
             "name": "symfony/flex",
-            "version": "v1.19.0",
+            "version": "v2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/flex.git",
-                "reference": "c36d11d1bca0a85dde6ca4d52bd4aceeb54dbd8f"
+                "reference": "f15c99ec98b5b31ae862035c51741294708211f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/flex/zipball/c36d11d1bca0a85dde6ca4d52bd4aceeb54dbd8f",
-                "reference": "c36d11d1bca0a85dde6ca4d52bd4aceeb54dbd8f",
+                "url": "https://api.github.com/repos/symfony/flex/zipball/f15c99ec98b5b31ae862035c51741294708211f2",
+                "reference": "f15c99ec98b5b31ae862035c51741294708211f2",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.0|^2.0",
-                "php": ">=7.1"
+                "composer-plugin-api": "^2.1",
+                "php": ">=8.0"
             },
             "require-dev": {
-                "composer/composer": "^1.0.2|^2.0",
-                "symfony/dotenv": "^4.4|^5.0|^6.0",
-                "symfony/filesystem": "^4.4|^5.0|^6.0",
-                "symfony/phpunit-bridge": "^4.4.12|^5.0|^6.0",
-                "symfony/process": "^4.4|^5.0|^6.0"
+                "composer/composer": "^2.1",
+                "symfony/dotenv": "^5.4|^6.0",
+                "symfony/filesystem": "^5.4|^6.0",
+                "symfony/phpunit-bridge": "^5.4|^6.0",
+                "symfony/process": "^5.4|^6.0"
             },
             "type": "composer-plugin",
             "extra": {
@@ -3254,7 +3254,7 @@
             "description": "Composer plugin for Symfony",
             "support": {
                 "issues": "https://github.com/symfony/flex/issues",
-                "source": "https://github.com/symfony/flex/tree/v1.19.0"
+                "source": "https://github.com/symfony/flex/tree/v2.2.0"
             },
             "funding": [
                 {
@@ -3270,7 +3270,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-06-03T07:58:31+00:00"
+            "time": "2022-06-03T08:42:12+00:00"
         },
         {
             "name": "symfony/framework-bundle",
