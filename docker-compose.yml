@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 
 services:
   server:
@@ -6,8 +6,6 @@ services:
     container_name: 'project_server'
     depends_on:
       - database
-    networks:
-      - project-network
     volumes:
       - .:/var/www/project
 
@@ -21,8 +19,6 @@ services:
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
       - ./public:/var/www/project
-    networks:
-      - project-network
     depends_on:
       - server
       - database
@@ -38,13 +34,11 @@ services:
       - target: 5432
         published: 5432
         protocol: tcp
-    networks:
-      - project-network
     volumes:
       - database:/var/lib/postgresql/data
 
 networks:
-  project-network:
+  default:
     driver: bridge
 
 volumes:
