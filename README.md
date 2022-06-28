@@ -15,7 +15,7 @@ The `xdebug` configuration is located `docker/php`. <br />
 
 ### Before starting
 
-Before using this template, please rename the docker user in the `Dockerfile`, and the docker workdir in the `Dockerfile` and `docker-compose.yml` file.<br />
+Before using this template, please use the `setupProject.sh` script to automatically customise the `Dockerfile`, and `docker-compose.yml` files to fit your project settings.<br />
 The User entity (`App\Entity\User`) has `app_user` as table name, change it to your needs. Avoid `user` as the table name since it's reserved by Postgres and will throw exceptions when trying to interact with the database.<br />
 
 

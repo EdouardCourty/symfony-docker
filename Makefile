@@ -16,7 +16,7 @@ dk-build:
 dk-restart: dk-stop
 dk-restart: dk-up
 
-dk-bash-php:
+bash:
 	$(DKC) exec server bash
 
 dk-vendor:
