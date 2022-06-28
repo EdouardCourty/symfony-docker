@@ -38,14 +38,14 @@ RUN docker-php-ext-enable xdebug
 
 RUN (umask 000; touch /var/log/xdebug.log)
 
-RUN useradd -ms /bin/bash project
-RUN usermod -u 1000 project
+RUN useradd -ms /bin/bash project_user
+RUN usermod -u 1000 project_user
 
 RUN touch /var/log/php-fpm.error.log
 RUN touch /var/log/php-fpm.access.log
 
-RUN chown -R project:project /var/log/php-fpm.error.log /var/log/php-fpm.access.log
+RUN chown -R project_user:project_user /var/log/php-fpm.error.log /var/log/php-fpm.access.log
 
-USER project
+USER project_user
 
 CMD ["php-fpm"]
