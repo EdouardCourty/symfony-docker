@@ -22,6 +22,7 @@ while true; do
           sed -i "s/project_user/$dockerUsername/g" Dockerfile; \
           echo "Project initialized, building container..."; \
           sleep .3; echo "."; sleep .5; echo "."; sleep .8; echo "."; sleep 1; \
+          rm setupProject.sh \
           make install; \
           break;;
         [Nn]* ) echo Aborted.; exit;;
