@@ -2,12 +2,11 @@
 
 namespace App\Entity;
 
-use App\Entity\Utils\TimestampTrait;
+use App\Entity\Exception\InvalidRoleException;
+use App\Entity\Utils\HasTimestampTrait;
+use App\Entity\Utils\HasUlidTrait;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
-use Symfony\Component\Uid\Ulid;
-use InvalidRoleException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -15,7 +14,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Table(name: 'app_user')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    use TimestampTrait;
+    use HasTimestampTrait;
+    use HasUlidTrait;
 
     public const ROLE_USER = 'ROLE_USER';
     public const ROLE_ADMIN = 'ROLE_ADMIN';
@@ -26,12 +26,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         self::ROLE_USER,
         self::ROLE_ADMIN
     ];
-
-    #[ORM\Id]
-    #[ORM\Column(type: 'ulid', unique: true)]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
-    private Ulid $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     private string $username;
@@ -45,11 +39,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __toString(): string
     {
         return $this->getUserIdentifier();
-    }
-
-    public function getId(): Ulid
-    {
-        return $this->id;
     }
 
     public function getUsername(): string

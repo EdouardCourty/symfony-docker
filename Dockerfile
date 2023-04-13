@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-bullseye
+FROM php:8.2-fpm-bullseye
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -16,7 +16,7 @@ RUN apt update && apt install -y \
     libgmp-dev \
     libpq-dev
 
-RUN pecl install xdebug-3.1.0beta2
+RUN pecl install xdebug-3.2.1
 
 COPY docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY docker/php/xdebug.ini /usr/local/etc/php/conf.d
