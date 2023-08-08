@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  server:
+    build: .
+    container_name: 'project_server'
+    depends_on:
+      - database
+    volumes:
+      - .:/var/www/project
+
+  proxy:
+    image: nginx:1.24-alpine3.17
+    container_name: 'project_proxy'
+    ports:
+      - target: 80
+        published: 8080
+        protocol: tcp
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+      - ./public:/var/www/project
+    depends_on:
+      - server
+      - database
+
+  database:
+    image: postgres:14.2-alpine
+    container_name: 'project_database'
+    environment:
+      - POSTGRES_DB=main_dev
+      - POSTGRES_PASSWORD=app
+      - POSTGRES_USER=app
+    ports:
+      - target: 5432
+        published: database_port
+        protocol: tcp
+    volumes:
+      - database:/var/lib/postgresql/data
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  database:
+    driver: local
