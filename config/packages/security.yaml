@@ -19,8 +19,18 @@ security:
 
         main:
             lazy: true
+            provider: app_user_provider
+            form_login:
+                login_path: security.login
+                check_path: security.login
+                default_target_path: homepage.index
+                always_use_default_target_path: true
+                remember_me: true
+            switch_user: { role: ROLE_ADMIN }
+            logout:
+                path: security.logout
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-#        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_ADMIN }
