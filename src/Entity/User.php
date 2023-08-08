@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
+use App\Entity\Contract\UserInterface;
 use App\Entity\Exception\InvalidRoleException;
 use App\Entity\Utils\HasTimestampTrait;
 use App\Entity\Utils\HasUlidTrait;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'app_user')]
@@ -35,6 +35,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string')]
     private string $password;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $enabled = true;
 
     public function __toString(): string
     {
@@ -128,5 +131,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function eraseCredentials(): void
     {
+    }
+
+    public function setEnabled(bool $enabled): self
+    {
+        $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 }
