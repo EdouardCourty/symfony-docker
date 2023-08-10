@@ -29,4 +29,10 @@
     {% else %}
         <a href="{{ path('security.google_unlink') }}">Unlink Google account</a>
     {% endif %}
+
+    <div>
+        <h3>Password reset</h3>
+
+        {{ form(password_reset_form) }}
+    </div>
 {% endblock %}

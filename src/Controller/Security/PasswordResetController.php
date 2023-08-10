@@ -5,7 +5,7 @@ namespace App\Controller\Security;
 use App\Repository\Doctrine\UserRepository;
 use App\Service\Customer\UserPasswordDirector;
 use App\Type\EmailAddressType;
-use App\Type\PasswordResetType;
+use App\Type\RepeatedPasswordType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,7 +57,7 @@ class PasswordResetController extends AbstractController
         $token = $request->get('token');
         $user = $token ? $this->userPasswordDirector->retrieveUser($token) : null;
 
-        $passwordResetForm = $this->createForm(PasswordResetType::class);
+        $passwordResetForm = $this->createForm(RepeatedPasswordType::class);
 
         $passwordResetForm->handleRequest($request);
 

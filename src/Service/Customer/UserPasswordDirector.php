@@ -7,6 +7,7 @@ use App\Factory\Entity\UserFactory;
 use App\Repository\Doctrine\UserRepository;
 use App\Repository\Redis\PasswordTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserPasswordDirector
 {
@@ -16,7 +17,8 @@ class UserPasswordDirector
         private readonly PasswordTokenRepository $passwordTokenRepository,
         private readonly UserRepository $userRepository,
         private readonly UserFactory $userFactory,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserPasswordHasherInterface $userPasswordHasher
     ) {
     }
 
@@ -33,6 +35,11 @@ class UserPasswordDirector
     public function sendPasswordResetEmail(User $user): void
     {
         return;
+    }
+
+    public function isPasswordValid(User $user, string $password): bool
+    {
+        return $this->userPasswordHasher->isPasswordValid($user, $password);
     }
 
     public function updatePassword(User $user, string $password): void
