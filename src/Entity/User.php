@@ -5,8 +5,9 @@ namespace App\Entity;
 use App\Entity\Contract\UserInterface;
 use App\Entity\Exception\InvalidRoleException;
 use App\Entity\Utils\HasTimestampTrait;
-use App\Entity\Utils\HasUlidTrait;
-use App\Repository\UserRepository;
+use App\Entity\Utils\HasUuidTrait;
+use App\Repository\Doctrine\UserRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
@@ -15,7 +16,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use HasTimestampTrait;
-    use HasUlidTrait;
+    use HasUuidTrait;
 
     public const ROLE_USER = 'ROLE_USER';
     public const ROLE_ADMIN = 'ROLE_ADMIN';
@@ -30,6 +31,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     private string $username;
 
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    private string $email;
+
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
@@ -38,6 +42,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $enabled = true;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $googleId = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $lastLogin = null;
 
     public function __toString(): string
     {
@@ -54,6 +64,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->username = $username;
 
         return $this;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
     }
 
     /**
@@ -143,5 +165,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function isEnabled(): bool
     {
         return $this->enabled;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setLastLogin(DateTimeImmutable $lastLogin): self
+    {
+        $this->lastLogin = $lastLogin;
+
+        return $this;
+    }
+
+    public function getLastLogin(): ?DateTimeImmutable
+    {
+        return $this->lastLogin;
     }
 }

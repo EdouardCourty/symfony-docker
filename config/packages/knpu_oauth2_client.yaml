@@ -1,0 +1,15 @@
+knpu_oauth2_client:
+    clients:
+        google_main:
+            type: google
+            client_id: '%env(GOOGLE_CLIENT_ID)%'
+            client_secret: '%env(GOOGLE_CLIENT_SECRET)%'
+            redirect_route: security.google_check
+            redirect_params: {}
+
+        google_link:
+            type: google
+            client_id: '%env(GOOGLE_CLIENT_ID)%'
+            client_secret: '%env(GOOGLE_CLIENT_SECRET)%'
+            redirect_route: security.google_link_check
+            redirect_params: {}

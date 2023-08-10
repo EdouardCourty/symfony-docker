@@ -57,3 +57,6 @@ install: dk-reload-database
 
 dk-migrate:
 	$(DKC) exec server bash -c "make _execute-migrations"
+
+phpstan:
+	$(DKC) exec server bash -c "vendor/bin/phpstan"

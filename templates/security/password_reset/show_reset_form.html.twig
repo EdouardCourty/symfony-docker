@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Reset form' %}
+
+{% block body %}
+    {{ app.flashes|json_encode }}
+
+    {% if email_sent %}
+    <p>An email has been sent!</p>
+    {% else %}
+    <p>Reset your password</p>
+
+    {{ form(form) }}
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Access Denied' %}
+
+{% block body %}
+    {{ message is defined ? message : 'Access denied.' }}
+{% endblock %}

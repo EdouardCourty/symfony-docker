@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Doctrine;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -34,5 +34,20 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->_em->persist($user);
         $this->_em->flush();
+    }
+
+    public function findUserByUsernameOrEmail(string $username, string $email): ?User
+    {
+        $result = $this->createQueryBuilder('user')
+            ->where('user.username = :username')
+            ->orWhere('user.email = :email')
+            ->setParameter('username', $username)
+            ->setParameter('email', $email)
+            ->getQuery()
+            ->getResult();
+
+        return empty($result)
+            ? null
+            : $result[0];
     }
 }

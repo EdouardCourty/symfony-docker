@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Profile' %}
+
+{% block body %}
+    {{ app.flashes|json_encode }}
+
+    <ul>
+        <li>
+            <h3>Username</h3>
+            <p>{{ user.username }}</p>
+        </li>
+        <li>
+            <h3>Email</h3>
+            <p>{{ user.email }}</p>
+        </li>
+        <li>
+            <h3>Roles</h3>
+            <p>{{ user.roles|join(', ') }}</p>
+        </li>
+        <li>
+            <h3>Google ID</h3>
+            <p>{{ user.googleId }}</p>
+        </li>
+    </ul>
+
+    {% if user.googleId is null %}
+        <a href="{{ path('security.google_link') }}">Link Google account</a>
+    {% else %}
+        <a href="{{ path('security.google_unlink') }}">Unlink Google account</a>
+    {% endif %}
+{% endblock %}

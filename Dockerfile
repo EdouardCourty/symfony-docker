@@ -14,9 +14,10 @@ RUN apt update && apt install -y \
     make \
     libcurl3-dev \
     libgmp-dev \
-    libpq-dev
+    libpq-dev \
+    librabbitmq-dev
 
-RUN pecl install xdebug-3.2.1
+RUN pecl install xdebug redis-6.0.0RC1 amqp
 
 COPY docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY docker/php/xdebug.ini /usr/local/etc/php/conf.d
@@ -34,18 +35,18 @@ RUN docker-php-ext-install \
     gmp \
     opcache
 
-RUN docker-php-ext-enable xdebug
+RUN docker-php-ext-enable xdebug redis amqp
 
 RUN (umask 000; touch /var/log/xdebug.log)
 
-RUN useradd -ms /bin/bash project_user
-RUN usermod -u 1000 project_user
+RUN useradd -ms /bin/bash project-user
+RUN usermod -u 1000 project-user
 
 RUN touch /var/log/php-fpm.error.log
 RUN touch /var/log/php-fpm.access.log
 
-RUN chown -R project_user:project_user /var/log/php-fpm.error.log /var/log/php-fpm.access.log
+RUN chown -R project-user:project-user /var/log/php-fpm.error.log /var/log/php-fpm.access.log
 
-USER project_user
+USER project-user
 
 CMD ["php-fpm"]

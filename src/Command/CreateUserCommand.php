@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\Entity\User;
-use App\Factory\UserFactory;
+use App\Factory\Entity\UserFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -29,6 +29,7 @@ class CreateUserCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $username = $io->ask('Please enter a username:');
+        $email = $io->ask('Please enter an email address:');
         $password = $io->askHidden('Please enter a password:');
         $passwordConfirmation = $io->askHidden('Confirm your password:');
 
@@ -44,7 +45,7 @@ class CreateUserCommand extends Command
             ? [User::ROLE_DEFAULT, User::ROLE_ADMIN]
             : [User::ROLE_DEFAULT];
 
-        $user = $this->userFactory->create($username, $password, $roles);
+        $user = $this->userFactory->create($username, $email, $password, $roles);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
