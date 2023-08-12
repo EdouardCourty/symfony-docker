@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Service\Customer\UserPasswordDirector;
+use App\Service\Customer\PasswordReset;
 use App\Type\UserPasswordResetType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserController extends AbstractController
 {
     public function __construct(
-        private readonly UserPasswordDirector $userPasswordDirector
+        private readonly PasswordReset $userPasswordDirector
     ) {
     }
 

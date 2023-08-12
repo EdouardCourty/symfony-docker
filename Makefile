@@ -1,5 +1,10 @@
-DKC = docker-compose
+DKC = docker compose
 BCL = php bin/console
+
+SERVER_BASH = $(DKC) exec server bash
+WORKER_BASH = $(DKC) exec worker bash
+
+CMD_ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
 dk-up:
 	$(DKC) up --detach
@@ -17,16 +22,16 @@ dk-restart: dk-stop
 dk-restart: dk-up
 
 bash:
-	$(DKC) exec server bash
+	$(SERVER_BASH)
 
 dk-vendor:
-	$(DKC) exec server bash -c "composer install"
+	$(SERVER_BASH)  -c "composer install"
 
-dk-cache-clear:
-	$(DKC) exec server bash -c "bin/console cache:clear"
+cc:
+	$(SERVER_BASH)  -c "$(BCL) cache:clear"
 
 dk-fix-style:
-	$(DKC) exec server bash -c "vendor/bin/phpcs --standard=PSR12 --extensions=php -n src"
+	$(SERVER_BASH) -c "vendor/bin/phpcs --standard=PSR12 --extensions=php -n src"
 
 _drop-database:
 	$(BCL) doctrine:database:drop --force
@@ -48,7 +53,7 @@ _reload-database: _load-database
 _reload-database: _load-fixtures
 
 dk-reload-database:
-	$(DKC) exec server bash -c "make _reload-database"
+	$(SERVER_BASH) -c "make _reload-database"
 
 install: dk-build
 install: dk-up
@@ -56,7 +61,16 @@ install: dk-vendor
 install: dk-reload-database
 
 dk-migrate:
-	$(DKC) exec server bash -c "make _execute-migrations"
+	$(SERVER_BASH) -c "make _execute-migrations"
 
 phpstan:
-	$(DKC) exec server bash -c "vendor/bin/phpstan"
+	$(SERVER_BASH) -c "vendor/bin/phpstan"
+
+consume: ## Starts a consumer on the given queue
+	$(WORKER_BASH) -c "$(BCL) messenger:consume $(CMD_ARGS)"
+
+_start-workers:
+	/usr/bin/supervisord -c /var/www/worker/docker/worker/workers.conf
+
+start-workers: ## Starts the workers
+	$(WORKER_BASH) -c "make _start-workers"

@@ -4,12 +4,13 @@ namespace App\Service\Customer;
 
 use App\Entity\User;
 use App\Factory\Entity\UserFactory;
+use App\Messenger\Message\PasswordResetMessage;
 use App\Repository\Doctrine\UserRepository;
 use App\Repository\Redis\PasswordTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
-class UserPasswordDirector
+class PasswordReset
 {
     private const TOKEN_TTL = 300; // 5 minutes
 
@@ -18,28 +19,29 @@ class UserPasswordDirector
         private readonly UserRepository $userRepository,
         private readonly UserFactory $userFactory,
         private readonly EntityManagerInterface $entityManager,
-        private readonly UserPasswordHasherInterface $userPasswordHasher
+        private readonly MessageBusInterface $messageBus
     ) {
     }
 
-    public function resetPassword(User $user): string
+    public function dispatchPasswordReset(User $user): void
+    {
+        $message = new PasswordResetMessage();
+        $message->userId = $user->getId()->toRfc4122();
+
+        $this->messageBus->dispatch($message);
+    }
+
+    public function resetPassword(User $user): void
     {
         $token = $this->generateToken();
         $this->passwordTokenRepository->setToken($user, $token, self::TOKEN_TTL);
 
-        $this->sendPasswordResetEmail($user);
-
-        return $token;
+        $this->sendPasswordResetEmail($user, $token);
     }
 
-    public function sendPasswordResetEmail(User $user): void
+    public function sendPasswordResetEmail(User $user, string $token): void
     {
-        return;
-    }
 
-    public function isPasswordValid(User $user, string $password): bool
-    {
-        return $this->userPasswordHasher->isPasswordValid($user, $password);
     }
 
     public function updatePassword(User $user, string $password): void

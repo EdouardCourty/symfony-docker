@@ -3,7 +3,7 @@
 namespace App\Controller\Security;
 
 use App\Repository\Doctrine\UserRepository;
-use App\Service\Customer\UserPasswordDirector;
+use App\Service\Customer\PasswordReset;
 use App\Type\EmailAddressType;
 use App\Type\RepeatedPasswordType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class PasswordResetController extends AbstractController
 {
     public function __construct(
-        private readonly UserPasswordDirector $userPasswordDirector,
+        private readonly PasswordReset  $userPasswordDirector,
         private readonly UserRepository $userRepository
     ) {
     }
@@ -38,10 +38,9 @@ class PasswordResetController extends AbstractController
                 return $this->redirectToRoute('password_reset.show_form');
             }
 
-            $token = $this->userPasswordDirector->resetPassword($user);
+            $this->userPasswordDirector->dispatchPasswordReset($user);
 
             $this->addFlash('success', 'A password reset email has been sent!');
-            $this->addFlash('token', $token);
             $emailSent = true;
         }
 

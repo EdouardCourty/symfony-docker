@@ -2,9 +2,10 @@
 
 namespace App\Validation\ConstraintValidator;
 
-use App\Service\Customer\UserPasswordDirector;
+use App\Service\Customer\PasswordReset;
 use App\Service\Security\UserSecurityDirector;
 use App\Validation\Constraint\CurrentPassword;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -12,7 +13,7 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 class CurrentPasswordValidator extends ConstraintValidator
 {
     public function __construct(
-        private readonly UserPasswordDirector $userPasswordDirector,
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly UserSecurityDirector $userSecurityDirector
     ) {
     }
@@ -29,7 +30,7 @@ class CurrentPasswordValidator extends ConstraintValidator
             return;
         }
 
-        if (false === $this->userPasswordDirector->isPasswordValid($currentUser, $value)) {
+        if (false === $this->userPasswordHasher->isPasswordValid($currentUser, $value)) {
             $this->context->buildViolation($constraint->message)->addViolation();
         }
     }

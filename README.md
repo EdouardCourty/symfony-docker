@@ -2,10 +2,23 @@
 
 ### General information about this template
 
-Software / Images versions:
+**Software / Images versions**
  - PHP: `php:8.2-fpm-bullseye`
  - Nginx: `nginx:1.24-alpine3.17`
  - PostgreSQL: `postgres:14.2-alpine`
+ - Redis: `redis:7-alpine`
+ - RabbitQM: `rabbitmq:3.10.7-management-alpine`
+
+**Authentication informations**
+- Database
+  - username, password: `app`
+  - database name: `main_dev`
+
+- Redis
+  - password: `redis`
+
+- RabbitMQ
+  - username & password: `rabbit`
 
 ### Configuration files
 
@@ -18,5 +31,8 @@ The `xdebug` configuration is located `docker/php`. <br />
 Before using this template, please use the `setupProject.sh` script to automatically customise the `Dockerfile`, and `docker-compose.yml` files to fit your project settings.<br />
 The User entity (`App\Entity\User`) has `app_user` as table name, change it to your needs. Avoid `user` as the table name since it's reserved by Postgres and will throw exceptions when trying to interact with the database.<br />
 
+**Needed PHP extensions**
+- php-redis
+- amqp
 
 &copy; Edouard Courty - 2023
