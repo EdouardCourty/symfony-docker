@@ -68,6 +68,13 @@ services:
       RABBITMQ_DEFAULT_PASS: rabbit
       RABBITMQ_DEFAULT_USER: rabbit
 
+  mailcatcher:
+    image: schickling/mailcatcher
+    ports:
+      - target: 1080
+        published: 1088
+        protocol: tcp
+
 networks:
   default:
     name: 'payday3forum_network'

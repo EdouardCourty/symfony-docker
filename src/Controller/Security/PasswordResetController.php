@@ -38,7 +38,7 @@ class PasswordResetController extends AbstractController
                 return $this->redirectToRoute('password_reset.show_form');
             }
 
-            $this->userPasswordDirector->dispatchPasswordReset($user);
+            $this->userPasswordDirector->resetPassword($user);
 
             $this->addFlash('success', 'A password reset email has been sent!');
             $emailSent = true;
@@ -64,7 +64,7 @@ class PasswordResetController extends AbstractController
             $password = $passwordResetForm->getData()['password'];
 
             $this->userPasswordDirector->updatePassword($user, $password);
-            $this->userPasswordDirector->invalidateToken($user);
+            $this->userPasswordDirector->invalidateResetToken($user);
         }
 
         return $this->render('security/password_reset/new_password.html.twig', [

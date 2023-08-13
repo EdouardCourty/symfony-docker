@@ -7,7 +7,6 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Component\Uid\Uuid;
 
-#[AsMessageHandler]
 abstract class Consumer
 {
     public function __construct(

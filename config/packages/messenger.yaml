@@ -7,25 +7,25 @@ framework:
                 context: { }
 
         transports:
-            password_reset:
+            send_email:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-                failure_transport: password_reset_error
+                failure_transport: send_email_error
                 options:
                     exchange:
-                        name: password_reset
+                        name: send_email
                     queues:
-                        password_reset: ~
+                        send_email: ~
 
-            password_reset_error:
+            send_email_error:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
                     exchange:
-                        name: password_reset_error
+                        name: send_email_error
                     queues:
-                        password_reset_error: ~
+                        send_email_error: ~
 
         routing:
-            App\Messenger\Message\PasswordResetMessage
+            App\Messenger\Message\SendEmailMessage: send_email
 
 # when@test:
 #    framework:

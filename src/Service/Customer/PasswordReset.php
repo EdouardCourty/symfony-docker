@@ -3,12 +3,20 @@
 namespace App\Service\Customer;
 
 use App\Entity\User;
+use App\Factory\Entity\EmailFactory;
 use App\Factory\Entity\UserFactory;
-use App\Messenger\Message\PasswordResetMessage;
+use App\Messenger\Message\SendEmailMessage;
 use App\Repository\Doctrine\UserRepository;
 use App\Repository\Redis\PasswordTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use RedisException;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\VarDumper\Exception\ThrowingCasterException;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class PasswordReset
 {
@@ -19,29 +27,42 @@ class PasswordReset
         private readonly UserRepository $userRepository,
         private readonly UserFactory $userFactory,
         private readonly EntityManagerInterface $entityManager,
-        private readonly MessageBusInterface $messageBus
+        private readonly MessageBusInterface $messageBus,
+        private readonly Environment $twig,
+        private readonly RouterInterface $router,
+        private readonly EmailFactory $emailFactory
     ) {
     }
 
-    public function dispatchPasswordReset(User $user): void
-    {
-        $message = new PasswordResetMessage();
-        $message->userId = $user->getId()->toRfc4122();
-
-        $this->messageBus->dispatch($message);
-    }
-
+    /**
+     * @throws RedisException
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
     public function resetPassword(User $user): void
     {
         $token = $this->generateToken();
         $this->passwordTokenRepository->setToken($user, $token, self::TOKEN_TTL);
 
-        $this->sendPasswordResetEmail($user, $token);
-    }
+        $emailContent = $this->twig->render('email/password_reset.html.twig', [
+            'resetLink' => $this->router->generate('password_reset.new_password', ['token' => $token])
+        ]);
 
-    public function sendPasswordResetEmail(User $user, string $token): void
-    {
+        $email = $this->emailFactory->create(
+            'password_reset_sender@admin.com',
+            'Password reset',
+            $emailContent,
+            [$user->getEmail()]
+        );
 
+        $this->entityManager->persist($email);
+        $this->entityManager->flush();
+
+        $sendEmailMessage = new SendEmailMessage();
+        $sendEmailMessage->emailId = $email->getId();
+
+        $this->messageBus->dispatch($sendEmailMessage);
     }
 
     public function updatePassword(User $user, string $password): void
@@ -50,11 +71,17 @@ class PasswordReset
         $this->entityManager->flush();
     }
 
-    public function invalidateToken(User $user): void
+    /**
+     * @throws RedisException
+     */
+    public function invalidateResetToken(User $user): void
     {
         $this->passwordTokenRepository->deleteToken($user);
     }
 
+    /**
+     * @throws RedisException
+     */
     public function retrieveUser(string $token): ?User
     {
         $userUuid = $this->passwordTokenRepository->getUserUuid($token);
