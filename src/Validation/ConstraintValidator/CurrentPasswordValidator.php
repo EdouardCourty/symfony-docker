@@ -2,8 +2,7 @@
 
 namespace App\Validation\ConstraintValidator;
 
-use App\Service\Customer\PasswordReset;
-use App\Service\Security\UserSecurityDirector;
+use App\Service\Security\User\UserSecurity;
 use App\Validation\Constraint\CurrentPassword;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Constraint;
@@ -14,7 +13,7 @@ class CurrentPasswordValidator extends ConstraintValidator
 {
     public function __construct(
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly UserSecurityDirector $userSecurityDirector
+        private readonly UserSecurity $userSecurityDirector
     ) {
     }
 

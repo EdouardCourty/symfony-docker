@@ -47,6 +47,8 @@ RUN touch /var/log/php-fpm.access.log
 
 RUN chown -R project-user:project-user /var/log/php-fpm.error.log /var/log/php-fpm.access.log
 
+RUN touch /var/log/xdebug.log
+
 USER project-user
 
 CMD ["php-fpm"]

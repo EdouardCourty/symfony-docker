@@ -20,12 +20,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public const ROLE_USER = 'ROLE_USER';
     public const ROLE_ADMIN = 'ROLE_ADMIN';
+    public const ROLE_EMAIL_VERIFIED = 'ROLE_EMAIL_VERIFIED';
 
     public const ROLE_DEFAULT = self::ROLE_USER;
 
     public const ROLES = [
         self::ROLE_USER,
-        self::ROLE_ADMIN
+        self::ROLE_ADMIN,
+        self::ROLE_EMAIL_VERIFIED
     ];
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]

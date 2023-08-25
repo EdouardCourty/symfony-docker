@@ -3,14 +3,14 @@
 namespace App\Repository\Redis;
 
 use App\Entity\User;
-use App\Register\PasswordTokenRegister;
+use App\Register\EmailVerificationTokenRegister;
 use RedisException;
 use Symfony\Component\Uid\Uuid;
 
-class PasswordTokenRepository
+class EmailVerificationTokenRepository
 {
     public function __construct(
-        private readonly PasswordTokenRegister $passwordTokenRegister
+        private readonly EmailVerificationTokenRegister $emailVerificationTokenRegister
     ) {
     }
 
@@ -19,7 +19,7 @@ class PasswordTokenRepository
      */
     public function setToken(User $user, string $token, int $ttl): void
     {
-        $this->passwordTokenRegister->set($token, $user->getId()->toRfc4122(), $ttl);
+        $this->emailVerificationTokenRegister->set($token, $user->getId()->toRfc4122(), $ttl);
     }
 
     /**
@@ -27,7 +27,7 @@ class PasswordTokenRepository
      */
     public function getUserUuid(string $token): ?Uuid
     {
-        $userUuid = $this->passwordTokenRegister->get($token);
+        $userUuid = $this->emailVerificationTokenRegister->get($token);
 
         return $userUuid ? new Uuid($userUuid) : null;
     }
@@ -37,6 +37,6 @@ class PasswordTokenRepository
      */
     public function deleteToken(string $token): void
     {
-        $this->passwordTokenRegister->delete($token);
+        $this->emailVerificationTokenRegister->delete($token);
     }
 }

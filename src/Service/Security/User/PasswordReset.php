@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Service\Customer;
+namespace App\Service\Security\User;
 
 use App\Entity\User;
 use App\Factory\Entity\EmailFactory;
 use App\Factory\Entity\UserFactory;
-use App\Messenger\Message\SendEmailMessage;
 use App\Repository\Doctrine\UserRepository;
 use App\Repository\Redis\PasswordTokenRepository;
+use App\Service\SMTP\EmailSender;
+use App\Service\Trait\RandomGeneratorTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use RedisException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\VarDumper\Exception\ThrowingCasterException;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -20,17 +20,18 @@ use Twig\Error\SyntaxError;
 
 class PasswordReset
 {
+    use RandomGeneratorTrait;
+
     private const TOKEN_TTL = 300; // 5 minutes
 
     public function __construct(
         private readonly PasswordTokenRepository $passwordTokenRepository,
-        private readonly UserRepository $userRepository,
         private readonly UserFactory $userFactory,
         private readonly EntityManagerInterface $entityManager,
-        private readonly MessageBusInterface $messageBus,
         private readonly Environment $twig,
         private readonly RouterInterface $router,
-        private readonly EmailFactory $emailFactory
+        private readonly EmailFactory $emailFactory,
+        private readonly EmailSender $emailSender
     ) {
     }
 
@@ -59,10 +60,7 @@ class PasswordReset
         $this->entityManager->persist($email);
         $this->entityManager->flush();
 
-        $sendEmailMessage = new SendEmailMessage();
-        $sendEmailMessage->emailId = $email->getId();
-
-        $this->messageBus->dispatch($sendEmailMessage);
+        $this->emailSender->sendEmailAsync($email);
     }
 
     public function updatePassword(User $user, string $password): void
@@ -74,9 +72,9 @@ class PasswordReset
     /**
      * @throws RedisException
      */
-    public function invalidateResetToken(User $user): void
+    public function invalidateResetToken(string $token): void
     {
-        $this->passwordTokenRepository->deleteToken($user);
+        $this->passwordTokenRepository->deleteToken($token);
     }
 
     /**
@@ -87,12 +85,7 @@ class PasswordReset
         $userUuid = $this->passwordTokenRepository->getUserUuid($token);
 
         return $userUuid
-            ? $this->userRepository->find($userUuid)
+            ? $this->entityManager->find(User::class, $userUuid)
             : null;
-    }
-
-    private function generateToken(): string
-    {
-        return md5(uniqid() . '_' . microtime());
     }
 }

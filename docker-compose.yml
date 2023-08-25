@@ -3,7 +3,7 @@ version: '3.8'
 services:
   server:
     build: .
-    container_name: 'payday3forum_server'
+    container_name: 'project_server'
     depends_on:
       - database
       - cache
@@ -13,7 +13,7 @@ services:
 
   worker:
     build: docker/worker
-    container_name: 'payday3forum_worker'
+    container_name: 'project_worker'
     volumes:
       - .:/var/www/worker
     depends_on:
@@ -23,7 +23,7 @@ services:
 
   proxy:
     image: nginx:1.24-alpine3.17
-    container_name: 'payday3forum_proxy'
+    container_name: 'project_proxy'
     ports:
       - target: 80
         published: 5803
@@ -36,7 +36,7 @@ services:
 
   database:
     image: postgres:14.2-alpine
-    container_name: 'payday3forum_database'
+    container_name: 'project_database'
     environment:
       - POSTGRES_DB=main_dev
       - POSTGRES_PASSWORD=app
@@ -50,14 +50,14 @@ services:
 
   cache:
     image: redis:7-alpine
-    container_name: 'payday3forum_redis'
+    container_name: 'project_redis'
     command: redis-server --requirepass redis
     volumes:
       - cache-data:/data
 
   rabbitmq:
     image: rabbitmq:3.10.7-management-alpine
-    container_name: 'payday3forum_rabbitmq'
+    container_name: 'project_rabbitmq'
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq/
     ports:
@@ -70,6 +70,7 @@ services:
 
   mailcatcher:
     image: schickling/mailcatcher
+    container_name: 'project_mailcatcher'
     ports:
       - target: 1080
         published: 1088
@@ -77,7 +78,7 @@ services:
 
 networks:
   default:
-    name: 'payday3forum_network'
+    name: 'project_network'
     driver: bridge
 
 volumes:

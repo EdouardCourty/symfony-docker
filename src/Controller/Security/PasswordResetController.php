@@ -3,7 +3,7 @@
 namespace App\Controller\Security;
 
 use App\Repository\Doctrine\UserRepository;
-use App\Service\Customer\PasswordReset;
+use App\Service\Security\User\PasswordReset;
 use App\Type\EmailAddressType;
 use App\Type\RepeatedPasswordType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -64,7 +64,9 @@ class PasswordResetController extends AbstractController
             $password = $passwordResetForm->getData()['password'];
 
             $this->userPasswordDirector->updatePassword($user, $password);
-            $this->userPasswordDirector->invalidateResetToken($user);
+            $this->userPasswordDirector->invalidateResetToken($token);
+
+            return $this->redirectToRoute('security.login');
         }
 
         return $this->render('security/password_reset/new_password.html.twig', [

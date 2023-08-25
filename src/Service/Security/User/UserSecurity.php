@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Security;
+namespace App\Service\Security\User;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -8,7 +8,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class UserSecurityDirector
+class UserSecurity
 {
     public function __construct(
         private readonly TokenStorageInterface $tokenStorage,

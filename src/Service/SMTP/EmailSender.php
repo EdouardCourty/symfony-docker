@@ -9,7 +9,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class MailSender
+class EmailSender
 {
     public function __construct(
         private readonly MailerInterface $mailer,

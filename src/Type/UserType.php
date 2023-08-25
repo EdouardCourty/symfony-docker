@@ -5,6 +5,7 @@ namespace App\Type;
 use App\Entity\User;
 use App\Validation\Constraint\Password;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -26,7 +27,7 @@ class UserType extends AbstractType
                     new NotNull()
                 ]
             ])
-            ->add('email', EmailAddressType::class, [
+            ->add('email', EmailType::class, [
                 'constraints' => [
                     new Email(),
                     new NotNull()

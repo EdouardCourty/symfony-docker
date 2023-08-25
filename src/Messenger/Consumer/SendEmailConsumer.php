@@ -5,7 +5,7 @@ namespace App\Messenger\Consumer;
 use App\Entity\Email;
 use App\Messenger\Message\SendEmailMessage;
 use App\Service\Messenger\Consumer;
-use App\Service\SMTP\MailSender;
+use App\Service\SMTP\EmailSender;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -15,7 +15,7 @@ class SendEmailConsumer extends Consumer
 {
     public function __construct(
         EntityManagerInterface $entityManager,
-        private readonly MailSender $mailSender
+        private readonly EmailSender $mailSender
     ) {
         parent::__construct($entityManager);
     }

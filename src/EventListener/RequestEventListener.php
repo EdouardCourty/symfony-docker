@@ -2,7 +2,7 @@
 
 namespace App\EventListener;
 
-use App\Service\Security\UserSecurityDirector;
+use App\Service\Security\User\UserSecurity;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 class RequestEventListener
 {
     public function __construct(
-        private readonly UserSecurityDirector $userSecurityDirector
+        private readonly UserSecurity $userSecurityDirector
     ) {
     }
 

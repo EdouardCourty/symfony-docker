@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Service\Customer\PasswordReset;
+use App\Service\Security\User\PasswordReset;
 use App\Type\UserPasswordResetType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +23,7 @@ class UserController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+
         $passwordChangeForm = $this->createForm(UserPasswordResetType::class);
         $passwordChangeForm->handleRequest($request);
 

@@ -35,4 +35,14 @@
 
         {{ form(password_reset_form) }}
     </div>
+
+    <div>
+        <h3>Email verification</h3>
+
+        {% if user.hasRole('ROLE_USER_VERIFIED') == false %}
+            <a href="{{ path('email_verification.show_form') }}">Verify your email</a>
+        {% else %}
+            <p>Email verified!</p>
+        {% endif %}
+    </div>
 {% endblock %}

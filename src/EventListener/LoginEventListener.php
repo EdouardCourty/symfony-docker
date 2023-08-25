@@ -3,7 +3,7 @@
 namespace App\EventListener;
 
 use App\Entity\User;
-use App\Service\Security\UserSecurityDirector;
+use App\Service\Security\User\UserSecurity;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -16,7 +16,7 @@ class LoginEventListener
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly UserSecurityDirector $userSecurityDirector
+        private readonly UserSecurity $userSecurityDirector
     ) {
     }
 
