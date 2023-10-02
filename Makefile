@@ -1,5 +1,7 @@
-DKC = docker-compose
+DKC = docker compose
 BCL = php bin/console
+
+CMD_ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
 dk-up:
 	$(DKC) up --detach
@@ -57,3 +59,12 @@ install: dk-reload-database
 
 dk-migrate:
 	$(DKC) exec server bash -c "make _execute-migrations"
+
+generate-keys:
+	$(DKC) exec server bash -c "openssl genrsa -out config/keys/private.pem 2048"
+	$(DKC) exec server bash -c "openssl rsa -in config/keys/private.pem -pubout -out config/keys/public.pem"
+
+# Creates a new Oauth2 Client
+# Args: name identifier secret
+create-oauth2-client:
+	$(DKC) exec server bash -c "$(BCL) league:oauth2-server:create-client $(CMD_ARGS)"

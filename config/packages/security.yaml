@@ -17,8 +17,17 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        main:
+        oauth2:
+            pattern: ^/oauth/v2
             lazy: true
+            form_login:
+                enable_csrf: ~
+                login_path: /oauth/v2/auth_login
+                check_path: /oauth/v2/auth_login
+
+        api:
+            pattern: ^/api
+            oauth2: true
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used

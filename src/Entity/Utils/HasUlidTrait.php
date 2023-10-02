@@ -12,9 +12,9 @@ trait HasUlidTrait
     #[ORM\Column(type: 'ulid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
-    protected Ulid $id;
+    private Ulid $id;
 
-    protected function getId(): Ulid
+    public function getId(): Ulid
     {
         return $this->id;
     }

@@ -1,0 +1,7 @@
+oauth2_authorize:
+    path: '/oauth/v2/authorize'
+    controller: 'league.oauth2_server.controller.authorization::indexAction'
+
+oauth2_token:
+    path: '/oauth/v2/token'
+    controller: 'league.oauth2_server.controller.token::indexAction'

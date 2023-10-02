@@ -3,7 +3,7 @@ version: '3.8'
 services:
   server:
     build: .
-    container_name: 'project_server'
+    container_name: 'project_server_2'
     depends_on:
       - database
     volumes:
@@ -11,10 +11,10 @@ services:
 
   proxy:
     image: nginx:1.24-alpine3.17
-    container_name: 'project_proxy'
+    container_name: 'project_proxy_2'
     ports:
       - target: 80
-        published: 8080
+        published: 8088
         protocol: tcp
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
@@ -25,14 +25,14 @@ services:
 
   database:
     image: postgres:14.2-alpine
-    container_name: 'project_database'
+    container_name: 'project_database_2'
     environment:
       - POSTGRES_DB=main_dev
       - POSTGRES_PASSWORD=app
       - POSTGRES_USER=app
     ports:
       - target: 5432
-        published: database_port
+        published: 5126
         protocol: tcp
     volumes:
       - database:/var/lib/postgresql/data

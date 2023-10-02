@@ -32,3 +32,11 @@ yarn-error.log
 /phpunit.xml
 .phpunit.result.cache
 ###< phpunit/phpunit ###
+
+###> phpstan/phpstan ###
+phpstan.neon
+###< phpstan/phpstan ###
+
+###> league/oauth2-server-bundle ###
+/config/keys/*.pem
+###< league/oauth2-server-bundle ###
