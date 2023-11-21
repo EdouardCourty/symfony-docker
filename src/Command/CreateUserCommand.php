@@ -33,7 +33,7 @@ class CreateUserCommand extends Command
         $passwordConfirmation = $io->askHidden('Confirm your password:');
 
         if ($password !== $passwordConfirmation) {
-            $io->error("Password don't match.");
+            $io->error("Passwords don't match.");
 
             return self::INVALID;
         }

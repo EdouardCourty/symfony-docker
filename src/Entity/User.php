@@ -5,7 +5,7 @@ namespace App\Entity;
 use App\Entity\Contract\UserInterface;
 use App\Entity\Exception\InvalidRoleException;
 use App\Entity\Utils\HasTimestampTrait;
-use App\Entity\Utils\HasUlidTrait;
+use App\Entity\Utils\HasUuidTrait;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -15,7 +15,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use HasTimestampTrait;
-    use HasUlidTrait;
+    use HasUuidTrait;
 
     public const ROLE_USER = 'ROLE_USER';
     public const ROLE_ADMIN = 'ROLE_ADMIN';

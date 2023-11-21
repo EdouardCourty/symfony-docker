@@ -1,23 +1,80 @@
-name: 'Run the full test suite'
+name: 'PHP CI'
 
 on:
   push:
-    branches:
-      - '!master'
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "*" ]
 
 jobs:
-  unit-tests:
+  validate-dependencies:
+    name: 'Validate Dependencies'
     runs-on: ubuntu-latest
     steps:
-      - name: 'Initialise repository'
-        uses: actions/checkout@v2
+      - name: 'Setup PHP'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
 
-      - name: 'Setup dependencies'
-        run: |
-          composer install --optimize-autoloader
+      - name: 'Initialise repository'
+        uses: actions/checkout@v3
+
+      - name: 'Validate composer.json and composer.lock'
+        run: composer validate --strict
+
+  code-style:
+    name: 'Code style'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Setup PHP'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+
+      - name: 'Initialise repository'
+        uses: actions/checkout@v3
+
+      - name: 'Cache Composer packages'
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: 'Run PHPStan'
+        run: php vendor/bin/phpstan
+
+      - name: 'Run PHPCS'
+        run: php vendor/bin/phpcs --standard=PSR12 --extensions=php -n src
+
+  tests:
+    name: 'Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Setup PHP'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+
+      - name: 'Initialise repository'
+        uses: actions/checkout@v3
+
+      - name: 'Cache Composer packages'
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
 
       - name: 'Run unit tests'
-        run: bin/phpunit
-
-      - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=PSR12 --extensions=php -n src
+        run: php bin/phpunit
