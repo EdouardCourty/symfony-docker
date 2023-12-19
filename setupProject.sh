@@ -12,6 +12,8 @@ port=${port:-defaultPort}
 read -rp "On what port should the PostgreSQL database run? [$defaultDbPort] " dbPort
 dbPort=${dbPort:-defaultDbPort}
 
+make copy-compose
+
 while true; do
     read -rp "Create project with name \"$projectName\", docker username \"$dockerUsername\" on port $port? [Y/N] " yn
     case $yn in
