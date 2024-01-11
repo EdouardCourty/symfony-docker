@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Homepage' %}
+
+{% block body %}
+    <main>
+        {% if app.user is not null %}
+            <p>Logged in as {{ app.user.username }}, welcome!</p>
+        {% else %}
+            <p>Not logged in, welcome!</p>
+        {% endif %}
+    </main>
+{% endblock %}

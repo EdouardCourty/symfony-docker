@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme registration_form 'bootstrap_5_layout.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    <main class="vh-100">
+        <section class="container-xxl h-100">
+            <div class="h-100 d-flex flex-column align-items-center justify-content-center">
+                {{ form(registration_form) }}
+            </div>
+        </section>
+    </main>
+{% endblock %}

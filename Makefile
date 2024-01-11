@@ -1,32 +1,37 @@
-DKC = docker-compose
+DKC = docker compose
 BCL = php bin/console
 
-dk-up:
-	$(DKC) up --detach
+##
+##                     ✨✨✨ The Makefile ✨✨✨
+##
+help: ## Outputs this help screen
+	@grep -E '(^[a-zA-Z0-9_-]+:.*?##.*$$)|(^##)' Makefile | awk 'BEGIN {FS = ":.*?## "}{printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m##/[33m/'
 
-dk-stop:
+##🐳 Docker
+up: ## Starts the Docker containers
+	$(DKC) up --detach --remove-orphans
+
+stop: ## Stops the Docker containers
 	$(DKC) stop
 
-dk-down:
-	$(DKC) down
+down: ## Downs the Docker containers & volumes
+	$(DKC) down -v
 
-dk-build:
+build: ## Builds the Docker containers
 	$(DKC) build
 
-dk-restart: dk-stop
-dk-restart: dk-up
+docker-restart: dk-stop ## Restarts the Docker containers
+docker-restart: dk-up
 
-bash:
+##🌐 Project
+bash: ## Starts a bash on the PHP server
 	$(DKC) exec server bash
 
-dk-vendor:
+vendor: ## Installs the PHP dependencies
 	$(DKC) exec server bash -c "composer install"
 
-dk-cache-clear:
+cc: ## Clears the Symfony cache
 	$(DKC) exec server bash -c "bin/console cache:clear"
-
-dk-fix-style:
-	$(DKC) exec server bash -c "vendor/bin/phpcs --standard=PSR12 --extensions=php -n src"
 
 _drop-database:
 	$(BCL) doctrine:database:drop --force
@@ -47,13 +52,43 @@ _reload-database: _drop-database
 _reload-database: _load-database
 _reload-database: _load-fixtures
 
-dk-reload-database:
+dk-reload-database: ## Reloads a clean database from the fixtures
 	$(DKC) exec server bash -c "make _reload-database"
 
-install: dk-build
-install: dk-up
-install: dk-vendor
+install: build ## Gets the project running from scratch
+install: up
+install: vendor
 install: dk-reload-database
 
-dk-migrate:
+migrate: ## Migrates the database to the latest version
 	$(DKC) exec server bash -c "make _execute-migrations"
+
+make-mig: ## Creates a new migration from the latest schema changes
+	$(DKC) exec server bash -c "$(BCL) make:migration"
+
+##⛩️ CodeStyle & Tests
+phpcs: ## Checks the PSR-12 compliance
+	$(DKC) exec server bash -c "vendor/bin/phpcs --standard=PSR12 --extensions=php -n src"
+
+phpunit: ## Runs the PHPUnit tests
+	$(DKC) exec server bash -c "vendor/bin/phpunit"
+
+phpstan: ## Runs the PHPStan
+	$(DKC) exec server bash -c "vendor/bin/phpstan"
+
+
+##
+##⛵ Deployment
+setup-ansible: ## Installs ansible
+	pip3 install ansible
+
+deploy-setup: ## Setup the production server
+	ansible-playbook -i ops/ansible/inventory_root ops/ansible/setup.yml
+
+deploy-production: ## Deploys the app in production
+	ansible-playbook -i ops/ansible/inventory ops/ansible/deploy.yml
+
+
+# These line avoid make to confuse argument with target
+%:
+	@:
