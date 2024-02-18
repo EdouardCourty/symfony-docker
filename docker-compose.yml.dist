@@ -10,7 +10,7 @@ services:
       - .:/var/www/project
 
   proxy:
-    image: nginx:1.24-alpine3.17
+    image: nginx:alpine3.18
     container_name: 'project_proxy'
     ports:
       - target: 80

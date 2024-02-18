@@ -35,13 +35,13 @@ docker-restart: dk-up
 install: build up vendor dk-reload-database ## Gets the project running from scratch
 
 bash: ## Starts a bash on the PHP server
-	$(DKC) exec server bash
+	$(DKC) exec server ash
 
 vendor: ## Installs the PHP dependencies
-	$(DKC) exec server bash -c "composer install"
+	$(DKC) exec server ash -c "composer install"
 
 cc: ## Clears the Symfony cache
-	$(DKC) exec server bash -c "$(BCL) cache:clear"
+	$(DKC) exec server ash -c "$(BCL) cache:clear"
 
 _drop-database:
 	$(BCL) doctrine:database:drop --force
@@ -59,23 +59,23 @@ _reload-database:
 	$(BCL) doctrine:fixtures:load --no-interaction
 
 reload-database: ## Reloads a clean database from the fixtures
-	$(DKC) exec server bash -c "make _reload-database"
+	$(DKC) exec server ash -c "make _reload-database"
 
 migrate: ## Migrates the database to the latest version
-	$(DKC) exec server bash -c "make _execute-migrations"
+	$(DKC) exec server ash -c "make _execute-migrations"
 
 make-mig: ## Creates a new migration from the latest schema changes
-	$(DKC) exec server bash -c "$(BCL) make:migration"
+	$(DKC) exec server ash -c "$(BCL) make:migration"
 
 ##⛩️ CodeStyle & Tests
 phpcs: ## Checks the PSR-12 compliance
-	$(DKC) exec server bash -c "$(PHPCS) --standard=PSR12 --extensions=php -n src"
+	$(DKC) exec server ash -c "$(PHPCS) --standard=PSR12 --extensions=php -n src"
 
 phpunit: ## Runs the PHPUnit tests
-	$(DKC) exec server bash -c "$(PHPUNIT)"
+	$(DKC) exec server ash -c "$(PHPUNIT)"
 
 phpstan: ## Runs the PHPStan
-	$(DKC) exec server bash -c "$(PHPSTAN)"
+	$(DKC) exec server ash -c "$(PHPSTAN)"
 
 # These line avoid make to confuse argument with target
 %:
