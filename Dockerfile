@@ -1,20 +1,20 @@
-FROM php:8.2-fpm-bullseye
+FROM php:8.2-fpm-alpine
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/project
 
-RUN apt update && apt install -y \
+RUN apk update && apk add \
     vim \
     git \
     libzip-dev \
-    libicu-dev \
+    icu-dev \
     zip \
-    libssh-dev \
     make \
-    libcurl3-dev \
-    libgmp-dev \
-    libpq-dev
+    curl-dev \
+    gmp-dev \
+    libpq \
+    postgresql-dev
 
 COPY docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY docker/php/php.ini /usr/local/etc/php/php.ini
@@ -31,8 +31,7 @@ RUN docker-php-ext-install \
     gmp \
     opcache
 
-RUN useradd -ms /bin/bash project_user
-RUN usermod -u 1000 project_user
+RUN adduser -s /bin/ash -u 1000 -D project_user project_user
 
 RUN touch /var/log/php-fpm.error.log
 RUN touch /var/log/php-fpm.access.log
