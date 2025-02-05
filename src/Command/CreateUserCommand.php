@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use App\Entity\User;
@@ -13,13 +15,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:user:create',
-    description: 'Creates a new user.'
+    description: 'Creates a new user.',
 )]
 class CreateUserCommand extends Command
 {
     public function __construct(
         private readonly UserFactory $userFactory,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
     }
@@ -40,7 +42,7 @@ class CreateUserCommand extends Command
 
         $shouldBeAdmin = $io->ask('Should this user be an Administrator?', 'Y');
 
-        $roles = in_array($shouldBeAdmin, ['Y', 'y'])
+        $roles = \in_array($shouldBeAdmin, ['Y', 'y'])
             ? [User::ROLE_DEFAULT, User::ROLE_ADMIN]
             : [User::ROLE_DEFAULT];
 
@@ -49,7 +51,7 @@ class CreateUserCommand extends Command
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $io->success(sprintf('User created. ID: %s', $user->getId()->toRfc4122()));
+        $io->success(\sprintf('User created. ID: %s', $user->getId()->toRfc4122()));
 
         return self::SUCCESS;
     }

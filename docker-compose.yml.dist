@@ -1,8 +1,10 @@
-version: '3.8'
+name: 'project'
 
 services:
   server:
-    build: .
+    build:
+      context: .
+      dockerfile: ./docker/dev/Dockerfile
     container_name: 'project_server'
     depends_on:
       - database
@@ -18,7 +20,7 @@ services:
         protocol: tcp
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
-      - ./public:/var/www/project
+      - ./public:/var/www/project/public
     depends_on:
       - server
       - database
@@ -36,10 +38,16 @@ services:
         protocol: tcp
     volumes:
       - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 networks:
   default:
     driver: bridge
+    name: project_network
 
 volumes:
   database:

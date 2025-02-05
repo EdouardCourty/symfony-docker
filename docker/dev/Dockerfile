@@ -1,10 +1,11 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.3-fpm-alpine
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/project
 
 RUN apk update && apk add \
+    linux-headers \
     vim \
     git \
     libzip-dev \
@@ -16,9 +17,9 @@ RUN apk update && apk add \
     libpq \
     postgresql-dev
 
-COPY docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.conf
-COPY docker/php/php.ini /usr/local/etc/php/php.ini
-COPY docker/php/opcache.ini /usr/local/etc/php/conf.d
+COPY docker/dev/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.conf
+COPY docker/dev/php/php.ini /usr/local/etc/php/php.ini
+COPY docker/dev/php/opcache.ini /usr/local/etc/php/conf.d
 
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
 
@@ -30,6 +31,9 @@ RUN docker-php-ext-install \
     curl \
     gmp \
     opcache
+
+RUN pecl install apcu
+RUN docker-php-ext-enable apcu
 
 RUN adduser -s /bin/ash -u 1000 -D project_user project_user
 

@@ -12,7 +12,7 @@ port=${port:-defaultPort}
 read -rp "On what port should the PostgreSQL database run? [$defaultDbPort] " dbPort
 dbPort=${dbPort:-defaultDbPort}
 
-make copy-compose
+cp docker-compose.yml.dist docker-compose.yml
 
 while true; do
     read -rp "Create project with name \"$projectName\", docker username \"$dockerUsername\" on port $port? [Y/N] " yn
@@ -21,9 +21,8 @@ while true; do
           sed -i "s/project_/$projectName\_/g" docker/nginx/project_local.conf; \
           sed -i "s/$defaultPort/$port/g" docker-compose.yml; \
           sed -i "s/database_port/$dbPort/g" docker-compose.yml; \
-          sed -i "s/project_user/$dockerUsername/g" Dockerfile; \
-          echo "Project initialized, building container..."; \
-          sleep .3; echo "."; sleep .5; echo "."; sleep .8; echo "."; sleep 1; \
+          sed -i "s/project_user/$dockerUsername/g" docker/dev/Dockerfile; \
+          echo "Project initialized, building the containers..."; \
           make install; \
           break;;
         [Nn]* ) echo Aborted.; exit;;

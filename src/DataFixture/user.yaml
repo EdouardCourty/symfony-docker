@@ -1,0 +1,16 @@
+---
+App\Entity\User:
+  admin_user:
+    id: 1efdcb10-1872-6190-8914-b1b98096f8bd
+    username: 'admin_user'
+    password: '$2y$13$EFq8AuQVyzXc33Ija9J36elUTxydY.JaHC1bGHUAicO2MPzSNY8Xa'
+    enabled: true
+    roles: !php/const App\Entity\User::ROLES
+
+  normal_user:
+    id: 886d09aa-8960-4d99-9676-eb7878d09134
+    username: 'user'
+    password: '$2y$13$IwtOJ951FOMqgpMU2Olw8.osTMeXvOOghjE9IQVGeaOgPTFLiX136'
+    enabled: true
+    roles:
+      - !php/const App\Entity\User::ROLE_USER

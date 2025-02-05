@@ -3,7 +3,7 @@
 ### General information about this template
 
 Software / Images versions:
- - PHP: `php:8.2-fpm-bullseye`
+ - PHP: `php:8.3-fpm-bullseye`
  - Nginx: `nginx:1.24-alpine3.17`
  - PostgreSQL: `postgres:14.2-alpine`
 

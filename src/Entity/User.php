@@ -1,35 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
-use App\Entity\Contract\UserInterface;
-use App\Entity\Exception\InvalidRoleException;
 use App\Entity\Utils\HasTimestampTrait;
 use App\Entity\Utils\HasUuidTrait;
+use App\Exception\InvalidRoleException;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'app_user')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements PasswordAuthenticatedUserInterface
 {
     use HasTimestampTrait;
     use HasUuidTrait;
 
-    public const ROLE_USER = 'ROLE_USER';
-    public const ROLE_ADMIN = 'ROLE_ADMIN';
+    public const string ROLE_USER = 'ROLE_USER';
+    public const string ROLE_ADMIN = 'ROLE_ADMIN';
 
-    public const ROLE_DEFAULT = self::ROLE_USER;
+    public const string ROLE_DEFAULT = self::ROLE_USER;
 
-    public const ROLES = [
+    public const array ROLES = [
         self::ROLE_USER,
-        self::ROLE_ADMIN
+        self::ROLE_ADMIN,
     ];
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     private string $username;
 
+    /** @var array<string> */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
@@ -56,16 +58,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return $this->username;
     }
 
     /**
-     * @see UserInterface
+     * @return array<string>
      */
     public function getRoles(): array
     {
@@ -76,12 +75,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
-    /**
-     * @throws InvalidRoleException
-     */
     public function addRole(string $roleString): self
     {
-        if (in_array($roleString, self::ROLES, true)) {
+        if (\in_array($roleString, self::ROLES, true)) {
             $this->roles[] = $roleString;
 
             return $this;
@@ -92,7 +88,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function hasRole(string $wantedRole): bool
     {
-        return in_array($wantedRole, $this->roles, true);
+        return \in_array($wantedRole, $this->roles, true);
     }
 
     public function removeRole(string $roleString): self
@@ -104,6 +100,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @param array<string> $roles
+     */
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
@@ -126,9 +125,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function eraseCredentials(): void
     {
     }
