@@ -19,7 +19,7 @@ services:
         published: 8080
         protocol: tcp
     volumes:
-      - ./docker/nginx:/etc/nginx/conf.d
+      - ./docker/dev/nginx:/etc/nginx/conf.d
       - ./public:/var/www/project/public
     depends_on:
       - server

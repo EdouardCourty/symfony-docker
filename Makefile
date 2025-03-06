@@ -78,7 +78,7 @@ make-mig: ## Creates a new migration from the latest schema changes
 ##
 ##⛩️  CodeStyle & Tests
 phpcs: ## Checks and fixes the PSR-12 compliance
-	$(DKC) exec server ash -c "$(PHPCSFIXER) fix"
+	$(DKC) exec server ash -c "$(PHPCS) fix"
 
 phpunit: ## Runs the PHPUnit tests
 	$(DKC) exec server ash -c "$(PHPUNIT) $(CMD_ARGS)"

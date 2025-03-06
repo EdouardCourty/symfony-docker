@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -31,6 +31,8 @@ RUN docker-php-ext-install \
     curl \
     gmp \
     opcache
+
+RUN apk add --no-cache --virtual .production-deps $PHPIZE_DEPS
 
 RUN pecl install apcu
 RUN docker-php-ext-enable apcu
