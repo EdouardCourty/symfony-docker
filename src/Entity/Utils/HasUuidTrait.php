@@ -20,4 +20,20 @@ trait HasUuidTrait
     {
         return $this->id;
     }
+
+    public function getIdString(): string
+    {
+        return $this->id->toRfc4122();
+    }
+
+    public function setId(Uuid|string $id): self
+    {
+        if (\is_string($id)) {
+            $id = Uuid::fromString($id);
+        }
+
+        $this->id = $id;
+
+        return $this;
+    }
 }
