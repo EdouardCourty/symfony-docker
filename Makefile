@@ -78,13 +78,13 @@ make-mig: ## Creates a new migration from the latest schema changes
 ##
 ##⛩️  CodeStyle & Tests
 phpcs: ## Checks and fixes the PSR-12 compliance
-	$(DKC) exec server ash -c "$(PHPCS) fix"
+	$(DKC) exec server ash -c "PHP_CS_FIXER_IGNORE_ENV=1 $(PHPCS) fix"
 
 phpunit: ## Runs the PHPUnit tests
 	$(DKC) exec server ash -c "$(PHPUNIT) $(CMD_ARGS)"
 
 phpstan: ## Runs the PHPStan
-	$(DKC) exec server ash -c "$(PHPSTAN) $(CMD_ARGS)"
+	$(DKC) exec server ash -c "$(PHPSTAN) --memory-limit=-1 $(CMD_ARGS)"
 
 # These line avoid make to confuse argument with target
 %:

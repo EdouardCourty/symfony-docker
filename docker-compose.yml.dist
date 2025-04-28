@@ -16,7 +16,7 @@ services:
     container_name: 'project_proxy'
     ports:
       - target: 80
-        published: 8080
+        published: nginx_port
         protocol: tcp
     volumes:
       - ./docker/dev/nginx:/etc/nginx/conf.d

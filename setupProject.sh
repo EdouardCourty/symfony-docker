@@ -1,40 +1,40 @@
-# DEFAULT VALUES
+#!/usr/bin/env bash
+
+if sed --version >/dev/null 2>&1; then
+  SED_I=( -i )
+else
+  SED_I=( -i '' )
+fi
+
+set -euo pipefail
+
 defaultPort=8080
 defaultDbPort=5432
 
-# Gather project variables
-# PROJECT NAME
-read -rp "What should be the project name? (lowercase, no spaces) " projectName
-
-# DOCKER USERNAME
-read -rp "What should be the docker username? [$projectName] " dockerUsername
+read -rp "Project name (lowercase, no spaces): " projectName
+read -rp "Docker username [$projectName]: " dockerUsername
 dockerUsername=${dockerUsername:-$projectName}
 
-# NGINX EXPOSED PORT
-read -rp "On what port should the Symfony app run? [$defaultPort] " port
-port=${port:-defaultPort}
+read -rp "Symfony app port [$defaultPort]: " port
+port=${port:-$defaultPort}
 
-# POSTGRESQL EXPOSED PORT
-read -rp "On what port should the PostgreSQL database run? [$defaultDbPort] " dbPort
-dbPort=${dbPort:-defaultDbPort}
+read -rp "PostgreSQL port [$defaultDbPort]: " dbPort
+dbPort=${dbPort:-$defaultDbPort}
 
-# Copy dist filed to actual files
 cp docker-compose.yml.dist docker-compose.yml
 cp .env.dist .env
 
-# EDIT PROJECT FILES
-while true; do
-    read -rp "Create project with name \"$projectName\", docker username \"$dockerUsername\" on port $port? [Y/N] " yn
-    case $yn in
-        [Yy]* ) sed -i "s/project_/$projectName\_/g" docker-compose.yml; \
-          sed -i "s/project_/$projectName\_/g" docker/nginx/project_local.conf; \
-          sed -i "s/$defaultPort/$port/g" docker-compose.yml; \
-          sed -i "s/database_port/$dbPort/g" docker-compose.yml; \
-          sed -i "s/project_user/$dockerUsername/g" docker/dev/Dockerfile; \
-          echo "Project initialized, building the containers..."; \
-          make install; \
-          break;;
-        [Nn]* ) echo Aborted.; exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+read -rp "Initialize project \"$projectName\" on ports $port/$dbPort? [y/N] " yn
+case "$yn" in
+  [Yy]* )
+    sed "${SED_I[@]}" "s/nginx_port/$port/g" docker-compose.yml
+    sed "${SED_I[@]}" "s/database_port/$dbPort/g" docker-compose.yml
+    sed "${SED_I[@]}" "s/project_user/$dockerUsername/g" docker/dev/Dockerfile
+    sed "${SED_I[@]}" "s/project_/${projectName}_/g" docker-compose.yml docker/dev/nginx/project_local.conf
+    echo "Building containers…"
+    make install
+    ;;
+  * )
+    echo "Aborted."; exit 1
+    ;;
+esac
