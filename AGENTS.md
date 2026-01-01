@@ -53,28 +53,16 @@ private bool $enabled;
 private array $data;
 ```
 
-### Available Types
+### Common Types
 
-- `Types::STRING` - VARCHAR
-- `Types::INTEGER` - INT
-- `Types::SMALLINT` - SMALLINT
-- `Types::BIGINT` - BIGINT
-- `Types::BOOLEAN` - BOOLEAN
-- `Types::DECIMAL` - DECIMAL
-- `Types::FLOAT` - FLOAT
-- `Types::TEXT` - TEXT
-- `Types::JSON` - JSON
-- `Types::DATETIME_MUTABLE` - DATETIME (mutable DateTime)
-- `Types::DATETIME_IMMUTABLE` - DATETIME (immutable DateTimeImmutable)
-- `Types::DATE_MUTABLE` - DATE (mutable DateTime)
-- `Types::DATE_IMMUTABLE` - DATE (immutable DateTimeImmutable)
-- `Types::TIME_MUTABLE` - TIME (mutable DateTime)
-- `Types::TIME_IMMUTABLE` - TIME (immutable DateTimeImmutable)
-- `Types::GUID` - GUID/UUID
-- `Types::BINARY` - BLOB
-- `Types::BLOB` - BLOB
-- `Types::SIMPLE_ARRAY` - Simple array
-- `Types::ARRAY` - PHP array (serialized)
+- `Types::STRING`, `Types::TEXT` - Text data
+- `Types::INTEGER`, `Types::BIGINT` - Numbers
+- `Types::BOOLEAN` - Boolean values
+- `Types::JSON` - JSON data
+- `Types::DATETIME_IMMUTABLE`, `Types::DATETIME_MUTABLE` - Date and time
+- `Types::GUID` - GUID identifiers
+
+See [Doctrine DBAL documentation](https://www.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/types.html) for the complete list.
 
 ## HTTP Methods and Status Codes
 
