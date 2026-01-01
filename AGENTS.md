@@ -254,11 +254,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HealthCheckTest extends WebTestCase
 {
-    public function testHealthCheckEndpoint(): void
+    public function testHealthCheckEndpointReturnsOk(): void
     {
         $client = static::createClient();
         $client->request('GET', '/healthcheck');
-        
+
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 }
