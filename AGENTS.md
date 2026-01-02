@@ -233,16 +233,14 @@ public function persistEntity(EntityManagerInterface $entityManager, $entityInst
 
 ### Custom Actions
 
-**IMPORTANT**: Custom controller actions MUST use the `#[AdminAction]` attribute to work properly with EasyAdmin:
+**IMPORTANT**: Custom controller actions MUST use the `#[AdminRoute]` attribute to work properly with EasyAdmin:
 
 ```php
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/admin/custom-action', name: 'admin_custom_action')]
-#[AdminAction] // ⚠️ REQUIRED for custom actions in EasyAdmin controllers
+#[AdminRoute(path: '/custom-action', name: 'custom_action')]
 public function customAction(AdminUrlGenerator $adminUrlGenerator): Response
 {
     // Your custom logic here
@@ -250,7 +248,27 @@ public function customAction(AdminUrlGenerator $adminUrlGenerator): Response
 }
 ```
 
-Without `#[AdminAction]`, the action won't be recognized as part of the admin interface and may not work correctly.
+**Key points about `#[AdminRoute]`**:
+
+- **No need for `#[Route]` attribute**: `#[AdminRoute]` replaces Symfony's `#[Route]` entirely for EasyAdmin controllers
+- **Path is relative**: The `path` is appended to the dashboard and CRUD paths (e.g., `/admin/product/custom-action`)
+- **Name is relative**: The `name` is appended to the dashboard and CRUD route names (e.g., `admin_product_custom_action`)
+- **`#[AdminAction]` is deprecated**: Since EasyAdmin 4.25.0, use `#[AdminRoute]` instead (AdminAction will be removed in 5.0.0)
+
+**Example with entity-specific action**:
+
+```php
+#[AdminRoute(path: '/{entityId}/approve', name: 'approve')]
+public function approve(AdminContext $context): Response
+{
+    $user = $context->getEntity()->getInstance();
+    // Approve user logic...
+    
+    return $this->redirect($context->getReferrer());
+}
+```
+
+Without `#[AdminRoute]`, the action won't be recognized as part of the admin interface and won't have proper routing.
 
 ### Key Features
 
