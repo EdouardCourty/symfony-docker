@@ -17,7 +17,10 @@ class HealthCheckTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertResponseIsSuccessful();
 
-        $content = json_decode($client->getResponse()->getContent(), true);
+        $responseContent = $client->getResponse()->getContent();
+        $this->assertIsString($responseContent);
+
+        $content = json_decode($responseContent, true);
         $this->assertIsArray($content);
         $this->assertArrayHasKey('status', $content);
         $this->assertSame('ok', $content['status']);

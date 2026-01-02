@@ -2,6 +2,17 @@
 
 This document outlines the development best practices and conventions for this Symfony project.
 
+## Table of Contents
+
+- [Docker-First Development](#docker-first-development)
+- [Understanding the Makefile](#understanding-the-makefile)
+- [Development Workflow](#development-workflow)
+- [EasyAdmin](#easyadmin)
+- [Doctrine Type Constants](#doctrine-type-constants)
+- [HTTP Methods and Status Codes](#http-methods-and-status-codes)
+- [Reusable Business Logic](#reusable-business-logic)
+- [Testing Structure](#testing-structure)
+
 ## Docker-First Development
 
 **⚠️ CRITICAL: All project binaries MUST be executed through Docker containers via the Makefile.**
@@ -124,6 +135,148 @@ Better to ask questions than to develop something that doesn't meet the actual r
 - "Should this be a unit test or a functional test?"
 - "Is this the correct HTTP method for this operation?"
 - "Are there any edge cases I should consider?"
+
+## EasyAdmin
+
+This project uses **EasyAdmin 4** for the administration interface. The admin panel is accessible at `/admin` and is protected by `ROLE_ADMIN`.
+
+### Structure
+
+```
+src/Controller/Admin/
+├── DashboardController.php      # Main dashboard
+└── CRUD/
+    └── UserCrudController.php   # CRUD controllers for entities
+```
+
+### Dashboard Controller
+
+The `DashboardController` is the entry point for the admin interface:
+
+```php
+#[Route('/admin', name: 'admin')]
+public function index(): Response
+{
+    return $this->render('admin/dashboard.html.twig', [
+        'stats' => [
+            'users' => $this->userRepository->count([]),
+        ],
+    ]);
+}
+
+public function configureMenuItems(): iterable
+{
+    yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
+    yield MenuItem::section('Users');
+    yield MenuItem::linkToCrud('Users', 'fa fa-users', User::class)
+        ->setController('App\\Controller\\Admin\\CRUD\\UserCrudController');
+}
+```
+
+### CRUD Controllers
+
+CRUD controllers extend `AbstractCrudController` and handle entity management:
+
+```php
+class UserCrudController extends AbstractCrudController
+{
+    public static function getEntityFqcn(): string
+    {
+        return User::class;
+    }
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('User')
+            ->setEntityLabelInPlural('Users')
+            ->setSearchFields(['username'])
+            ->setDefaultSort(['createdAt' => 'DESC']);
+    }
+
+    public function configureFields(string $pageName): iterable
+    {
+        yield TextField::new('username', 'Username');
+        yield TextField::new('password', 'Password')
+            ->onlyOnForms()
+            ->setRequired($pageName === Crud::PAGE_NEW);
+        // ...
+    }
+}
+```
+
+### Customizing Entity Persistence
+
+Override `persistEntity()` and `updateEntity()` for custom logic (e.g., password hashing):
+
+```php
+public function __construct(
+    private readonly UserPasswordHasherInterface $passwordHasher,
+) {
+}
+
+public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
+{
+    if (!$entityInstance instanceof User) {
+        return;
+    }
+
+    $plainPassword = $entityInstance->getPassword();
+    if ($plainPassword) {
+        $hashedPassword = $this->passwordHasher->hashPassword($entityInstance, $plainPassword);
+        $entityInstance->setPassword($hashedPassword);
+    }
+
+    parent::persistEntity($entityManager, $entityInstance);
+}
+```
+
+### Custom Actions
+
+**IMPORTANT**: Custom controller actions MUST use the `#[AdminRoute]` attribute to work properly with EasyAdmin:
+
+```php
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AdminRoute(path: '/custom-action', name: 'custom_action')]
+public function customAction(AdminUrlGenerator $adminUrlGenerator): Response
+{
+    // Your custom logic here
+    return $this->redirectToRoute('admin');
+}
+```
+
+**Key points about `#[AdminRoute]`**:
+
+- **No need for `#[Route]` attribute**: `#[AdminRoute]` replaces Symfony's `#[Route]` entirely for EasyAdmin controllers
+- **Path is relative**: The `path` is appended to the dashboard and CRUD paths (e.g., `/admin/product/custom-action`)
+- **Name is relative**: The `name` is appended to the dashboard and CRUD route names (e.g., `admin_product_custom_action`)
+- **`#[AdminAction]` is deprecated**: Since EasyAdmin 4.25.0, use `#[AdminRoute]` instead (AdminAction will be removed in 5.0.0)
+
+**Example with entity-specific action**:
+
+```php
+#[AdminRoute(path: '/{entityId}/approve', name: 'approve')]
+public function approve(AdminContext $context): Response
+{
+    $user = $context->getEntity()->getInstance();
+    // Approve user logic...
+    
+    return $this->redirect($context->getReferrer());
+}
+```
+
+Without `#[AdminRoute]`, the action won't be recognized as part of the admin interface and won't have proper routing.
+
+### Key Features
+
+- **Field Types**: `TextField`, `BooleanField`, `DateTimeField`, `ArrayField`, `ChoiceField`, `AssociationField`, etc.
+- **Field Display Control**: `onlyOnForms()`, `onlyOnIndex()`, `onlyOnDetail()`, `hideOnForm()`, `hideOnIndex()`
+- **Actions**: Configure available actions with `configureActions()` - add, remove, or customize CRUD actions
+- **Search**: Define searchable fields with `setSearchFields()`
+- **Sorting**: Set default sort order with `setDefaultSort()`
 
 ## Doctrine Type Constants
 

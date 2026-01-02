@@ -62,6 +62,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
+        if ($this->username === '') {
+            throw new \LogicException('The user has no username set.');
+        }
+
         return $this->username;
     }
 
