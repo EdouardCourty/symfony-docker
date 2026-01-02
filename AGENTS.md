@@ -2,6 +2,129 @@
 
 This document outlines the development best practices and conventions for this Symfony project.
 
+## Docker-First Development
+
+**⚠️ CRITICAL: All project binaries MUST be executed through Docker containers via the Makefile.**
+
+### Why Docker Only?
+
+This project uses Docker to ensure:
+- Consistent development environment across all machines
+- Correct PHP version and extensions
+- Proper database configuration
+- Isolated dependencies
+
+### ❌ Never Do This
+
+```bash
+# DON'T run binaries directly on your host machine
+php bin/console cache:clear
+vendor/bin/phpunit
+vendor/bin/phpstan
+composer install
+```
+
+### ✅ Always Do This
+
+```bash
+# Use the Makefile to execute commands in Docker containers
+make cc                    # Clear cache
+make phpunit              # Run tests
+make phpstan              # Run static analysis
+make vendor-install       # Install dependencies
+```
+
+## Understanding the Makefile
+
+The Makefile is your primary interface for all project operations. It wraps Docker commands and ensures everything runs in the correct containerized environment.
+
+### Key Concepts
+
+- All commands use Docker Compose
+- Commands are executed inside the `server` container via `docker compose exec server`
+- The Makefile provides convenient shortcuts for common tasks
+
+### Available Commands
+
+Run `make help` to see all available commands. Key categories:
+
+#### 🐳 Docker Management
+- `make up` - Start containers
+- `make stop` - Stop containers
+- `make down` - Stop and remove containers & volumes
+- `make build` - Build Docker images
+- `make restart` - Restart containers
+- `make bash` - Access container shell
+
+#### 🌐 Project Setup
+- `make install` - Complete project setup from scratch
+- `make vendor-install` - Install PHP dependencies
+- `make cc` - Clear Symfony cache
+- `make reload-database` - Reset database with fixtures
+- `make reload-tests` - Reset test database
+- `make migrate` - Run migrations
+- `make make-mig` - Create new migration
+
+#### ⛩️ Code Quality & Testing
+- `make phpcs` - Fix code style (PSR-12)
+- `make phpunit` - Run PHPUnit tests
+- `make phpstan` - Run static analysis
+
+### Passing Arguments
+
+Some commands accept arguments:
+
+```bash
+# Run specific test file
+make phpunit tests/Unit/SomeTest.php
+```
+
+## Development Workflow
+
+When developing a new feature, **ALWAYS** follow this quality checklist:
+
+### ✅ Quality Checklist
+
+Before considering a feature complete, run these three commands:
+
+```bash
+make phpcs   # Fix code style issues
+make phpstan # Check for type errors and bugs
+make phpunit # Ensure all tests pass (you can reload the database with `make reload-tests` if needed))
+```
+
+**All three must pass successfully.** This ensures:
+- Code follows PSR-12 standards
+- No type errors or potential bugs
+- All existing functionality still works
+- New code is properly tested
+
+### Development Steps
+
+1**Develop your feature**
+2**Write tests** (Unit, Functional, or both)
+3**Run quality checks**:
+   ```bash
+   make phpcs
+   make phpstan
+   make phpunit
+   ```
+
+## When in Doubt, Ask!
+
+**⚠️ IMPORTANT: If anything is unclear about the requirements, implementation approach, or expected behavior, ALWAYS ask for clarification before proceeding.**
+
+Better to ask questions than to develop something that doesn't meet the actual requirements. This saves time and ensures accuracy.
+
+### Questions to Ask
+
+- "Should this endpoint return a 200 or 201 status code?"
+- "Should this validation be in the controller or in an Action class?"
+- "What should happen if the user is not authenticated?"
+- "Should this be a unit test or a functional test?"
+- "Is this the correct HTTP method for this operation?"
+- "Are there any edge cases I should consider?"
+
 ## Doctrine Type Constants
 
 Always use Doctrine's `Types` class constants for column type declarations instead of string literals.
@@ -17,24 +140,6 @@ private string $name;
 
 #[ORM\Column(type: Types::INTEGER)]
 private int $age;
-
-#[ORM\Column(type: Types::BOOLEAN)]
-private bool $enabled;
-
-#[ORM\Column(type: Types::JSON)]
-private array $data;
-
-#[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-private \DateTimeImmutable $createdAt;
-
-#[ORM\Column(type: Types::DATETIME_MUTABLE)]
-private \DateTime $updatedAt;
-
-#[ORM\Column(type: Types::TEXT)]
-private string $description;
-
-#[ORM\Column(type: Types::GUID)]
-private string $uuid;
 ```
 
 ### ❌ Bad Practice
@@ -42,12 +147,6 @@ private string $uuid;
 ```php
 #[ORM\Column(type: 'string', length: 255)]
 private string $name;
-
-#[ORM\Column(type: 'integer')]
-private int $age;
-
-#[ORM\Column(type: 'boolean')]
-private bool $enabled;
 
 #[ORM\Column(type: 'json')]
 private array $data;
@@ -62,7 +161,7 @@ private array $data;
 - `Types::DATETIME_IMMUTABLE`, `Types::DATETIME_MUTABLE` - Date and time
 - `Types::GUID` - GUID identifiers
 
-See [Doctrine DBAL documentation](https://www.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/types.html) for the complete list.
+See the [Doctrine DBAL Types Class](vendor/doctrine/dbal/src/Types/Types.php) for the complete list.
 
 ## HTTP Methods and Status Codes
 
@@ -102,7 +201,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 // Success responses
 return new JsonResponse($data, Response::HTTP_OK);                    // 200
 return new JsonResponse($data, Response::HTTP_CREATED);               // 201
-return new JsonResponse(null, Response::HTTP_NO_CONTENT);            // 204
+return new JsonResponse(null, Response::HTTP_NO_CONTENT);             // 204
 
 // Client error responses
 return new JsonResponse($error, Response::HTTP_BAD_REQUEST);          // 400
@@ -314,6 +413,9 @@ class UserControllerTest extends WebTestCase
 
 ## Summary
 
+- ✅ **ALWAYS use Docker containers via Makefile** - Never run binaries directly
+- ✅ **Run quality checks before committing** - `make phpcs`, `make phpstan`, `make phpunit`
+- ✅ **Ask for clarification when unclear** - Better to ask than develop incorrectly
 - ✅ Always use `Types::*` constants for Doctrine column types
 - ✅ Always use `Request::METHOD_*` constants for HTTP methods
 - ✅ Always use `Response::HTTP_*` constants for HTTP status codes
