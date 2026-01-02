@@ -8,12 +8,14 @@ use App\Entity\Utils\HasTimestampTrait;
 use App\Entity\Utils\HasUuidTrait;
 use App\Exception\InvalidRoleException;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'app_user')]
-class User implements PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use HasTimestampTrait;
     use HasUuidTrait;
@@ -28,17 +30,17 @@ class User implements PasswordAuthenticatedUserInterface
         self::ROLE_ADMIN,
     ];
 
-    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[ORM\Column(type: Types::STRING, length: 180, unique: true)]
     private string $username;
 
     /** @var array<string> */
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: Types::STRING)]
     private string $password;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $enabled = true;
 
     public function __toString(): string
