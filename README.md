@@ -47,17 +47,9 @@ symfony-docker/
 
 ### Prerequisites
 
-This project uses [Castor](https://github.com/jolicode/castor) as task runner. Install it if not already present on your machine:
+This project uses [Castor](https://github.com/jolicode/castor) as task runner.
 
-```bash
-# Using Homebrew (macOS/Linux)
-brew install castor
-
-# Using Composer globally
-composer global require jolicode/castor
-
-# Or download the PHAR from https://github.com/jolicode/castor/releases
-```
+**Installation:** https://castor.jolicode.com/installation/
 
 ### 1. Initialize the project
 
