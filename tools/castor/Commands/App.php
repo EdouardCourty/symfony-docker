@@ -117,7 +117,7 @@ function load_fixtures(): void
 }
 
 // Quality commands
-#[AsTask(description: 'Run PHP CS Fixer', aliases: ['app:phpcs'])]
+#[AsTask(description: 'Run PHP CS Fixer', namespace: 'app', aliases: ['app:phpcs'])]
 function php_cs_fixer(): void
 {
     (new DockerCommandBuilder())
@@ -127,7 +127,7 @@ function php_cs_fixer(): void
         ->exec('vendor/bin/php-cs-fixer fix');
 }
 
-#[AsTask(description: 'Run PHPStan static analysis')]
+#[AsTask(description: 'Run PHPStan static analysis', namespace: 'app')]
 function phpstan(
     #[AsArgument(description: 'Additional arguments for PHPStan')]
     ?string $args = null
@@ -147,7 +147,7 @@ function phpstan(
 }
 
 // Test commands
-#[AsTask(description: 'Run PHPUnit tests')]
+#[AsTask(description: 'Run PHPUnit tests', namespace: 'app')]
 function phpunit(
     #[AsArgument(description: 'Test file path (e.g., tests/Unit/SomeTest.php)')]
     ?string $path = null,
@@ -172,7 +172,7 @@ function phpunit(
 }
 
 // QA command
-#[AsTask(description: 'Run all quality checks (phpcs, phpstan, phpunit)', aliases: ['qa'])]
+#[AsTask(description: 'Run all quality checks (phpcs, phpstan, phpunit)', namespace: 'app', aliases: ['qa'])]
 function qa(): void
 {
     io()->title('Running Quality Assurance checks');

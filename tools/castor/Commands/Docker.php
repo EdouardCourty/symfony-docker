@@ -11,7 +11,7 @@ use Tools\Castor\Enum\ProjectFolder;
 use Tools\Castor\Enum\Service;
 use Tools\Castor\Builder\DockerCommandBuilder;
 
-#[AsTask(description: 'Start Docker containers', aliases: ['start'])]
+#[AsTask(description: 'Start Docker containers', namespace: 'docker', aliases: ['start'])]
 function start(
     #[AsArgument(description: 'Services to start (database, server, proxy). Leave empty for all')]
     array $services = [],
@@ -29,7 +29,7 @@ function start(
     $builder->up();
 }
 
-#[AsTask(description: 'Stop Docker containers', aliases: ['stop'])]
+#[AsTask(description: 'Stop Docker containers', namespace: 'docker', aliases: ['stop'])]
 function stop(
     #[AsArgument(description: 'Services to stop (database, server, proxy). Leave empty for all')]
     ?array $services = null,
@@ -45,7 +45,7 @@ function stop(
     $builder->stop();
 }
 
-#[AsTask(description: 'Stop and remove Docker containers', aliases: ['down'])]
+#[AsTask(description: 'Stop and remove Docker containers', namespace: 'docker', aliases: ['down'])]
 function down(
     #[AsOption(shortcut: 'v', description: 'Remove volumes')]
     bool $volumes = false,
@@ -56,7 +56,7 @@ function down(
         ->down();
 }
 
-#[AsTask(description: 'Build Docker containers')]
+#[AsTask(description: 'Build Docker containers', namespace: 'docker')]
 function build(
     #[AsArgument(description: 'Services to build (database, server, proxy). Leave empty for all')]
     ?array $services = null,
@@ -72,7 +72,7 @@ function build(
     $builder->build();
 }
 
-#[AsTask(description: 'Restart Docker containers', aliases: ['restart'])]
+#[AsTask(description: 'Restart Docker containers', namespace: 'docker', aliases: ['restart'])]
 function restart(
     #[AsArgument(description: 'Services to restart (database, server, proxy). Leave empty for all')]
     ?array $services = null,
@@ -88,7 +88,7 @@ function restart(
     $builder->restart();
 }
 
-#[AsTask(description: 'Open bash on server container', aliases: ['bash'])]
+#[AsTask(description: 'Open bash on server container', namespace: '', aliases: ['bash'])]
 function bash(
     #[AsOption(shortcut: 'p', description: 'Project folder: app or tools')]
     string $project = 'app',
@@ -106,13 +106,13 @@ function bash(
         ->exec('ash');
 }
 
-#[AsTask(description: 'List Docker containers status', aliases: ['ps'])]
+#[AsTask(description: 'List Docker containers status', namespace: 'docker', aliases: ['ps'])]
 function ps(): void
 {
     (new DockerCommandBuilder())->withAllServices()->ps();
 }
 
-#[AsTask(description: 'Show Docker container logs', aliases: ['logs'])]
+#[AsTask(description: 'Show Docker container logs', namespace: 'docker', aliases: ['logs'])]
 function logs(
     #[AsArgument(description: 'Service name (server, proxy, database)')]
     ?string $service = null,
