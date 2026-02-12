@@ -1,0 +1,5 @@
+name: {{ project_name }}
+
+networks:
+  {{ project_name }}_network:
+    driver: bridge

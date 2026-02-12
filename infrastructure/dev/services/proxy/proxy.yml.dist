@@ -1,0 +1,21 @@
+name: {{ project_name }}
+
+services:
+  proxy:
+    image: nginx:alpine3.18
+    container_name: '{{ project_name }}_proxy'
+    ports:
+      - target: 80
+        published: {{ nginx_port }}
+        protocol: tcp
+    volumes:
+      - ./configurations/nginx:/etc/nginx/conf.d
+      - ../../app/public:/var/www/project/public
+    depends_on:
+      - server
+      - database
+
+networks:
+  default:
+    name: {{ project_name }}_network
+    external: true

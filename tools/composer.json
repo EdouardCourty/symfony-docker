@@ -1,0 +1,16 @@
+{
+    "require": {
+        "php": ">=8.4"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tools\\Castor\\": "castor/"
+        }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2",
+        "phpstan/phpstan-doctrine": "^2",
+        "phpstan/phpstan-phpunit": "^2",
+        "friendsofphp/php-cs-fixer": "^3.66"
+    }
+}

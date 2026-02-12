@@ -2,43 +2,141 @@
 
 This document outlines the development best practices and conventions for this Symfony project.
 
+**⚠️ Keep this document concise and precise. No fluff.**
+
 ## Table of Contents
 
+- [Project Structure](#project-structure)
 - [Docker-First Development](#docker-first-development)
-- [Understanding the Makefile](#understanding-the-makefile)
+- [Castor Task Runner](#castor-task-runner)
 - [Development Workflow](#development-workflow)
 - [Coding Guidelines](#coding-guidelines)
 - [EasyAdmin](#easyadmin)
 - [Reusable Business Logic](#reusable-business-logic)
 - [Testing Structure](#testing-structure)
 
+## Project Structure
+
+```
+symfony-docker/
+├── app/                    # Symfony application
+│   ├── src/               # Application code
+│   ├── tests/             # Tests (Smoke, Unit, Functional)
+│   ├── config/            # Symfony configuration
+│   └── composer.json      # App dependencies
+├── tools/                  # Development tools
+│   ├── castor/            # Castor commands & builders
+│   │   ├── Commands/      # Task definitions (App.php, Docker.php, Project.php)
+│   │   ├── Builder/       # DockerCommandBuilder
+│   │   └── Enum/          # Service, ProjectFolder enums
+│   ├── phpstan.neon       # PHPStan config (analyzes app/)
+│   ├── .php-cs-fixer.php  # PHP CS Fixer config (analyzes app/)
+│   └── composer.json      # Tools dependencies
+└── infrastructure/dev/
+    ├── network.yml         # Docker network definition
+    ├── services/           # Service definitions
+    │   ├── database/       # PostgreSQL service + .env
+    │   ├── server/         # PHP-FPM service
+    │   └── proxy/          # Nginx service
+    └── configurations/     # Service configurations
+        ├── nginx/          # Nginx config
+        ├── php/            # PHP Dockerfile + config
+        └── php-fpm/        # PHP-FPM config
+```
+
+**Key principles:**
+- ✅ `app/` contains ONLY Symfony code
+- ✅ `tools/` contains QA tools and Castor commands
+- ✅ QA configs in `tools/` analyze `app/` code (keeps app/ clean)
+
 ## Docker-First Development
 
-**⚠️ CRITICAL: All project binaries MUST be executed through Docker containers via the Makefile.**
+**⚠️ CRITICAL: All project binaries MUST be executed through Docker containers via Castor.**
 
 Ensures consistent environment, correct PHP version/extensions, and isolated dependencies.
 
 **Never run binaries directly:** `php bin/console`, `vendor/bin/phpunit`, `composer install`  
-**Always use Makefile:** `make cc`, `make phpunit`, `make phpstan`, `make vendor-install`
+**Always use Castor:** `castor cc`, `castor app:phpunit`, `castor app:phpstan`, `castor install`
 
-## Understanding the Makefile
+## Castor Task Runner
 
-The Makefile wraps Docker Compose commands executed inside the `server` container. Run `make help` for all commands.
+Castor replaces the Makefile. All commands are defined in `tools/castor/Commands/`.
 
-**Key commands:**
-- Docker: `make up`, `make stop`, `make down`, `make bash`
-- Setup: `make install`, `make vendor-install`, `make cc`, `make reload-database`, `make migrate`
-- Quality: `make phpcs`, `make phpstan`, `make phpunit`
+### Key Commands
 
-**Pass arguments:** `make phpunit tests/Unit/SomeTest.php`
+**Project setup:**
+```bash
+castor project:init          # Initialize project (generate Docker configs)
+castor install [app|tools|all]  # Install dependencies & setup
+```
+
+**Docker management:**
+```bash
+castor docker:start [services]  # Start all or specific services
+castor docker:stop [services]   # Stop all or specific services
+castor docker:down [-v]         # Stop & remove (--volumes to delete data)
+castor bash [-p app|tools]      # Open shell in container
+castor docker:ps                # List running containers
+```
+
+**Development:**
+```bash
+castor cc                    # Clear Symfony cache
+castor app:phpcs            # Fix code style (PSR-12)
+castor app:phpstan          # Static analysis
+castor app:phpunit [path]   # Run tests (optional: specific file or --filter)
+castor app:qa               # Run all QA checks (phpcs + phpstan + phpunit)
+```
+
+**Database:**
+```bash
+castor database:reload           # Drop, create, migrate, load fixtures
+castor database:reload-tests     # Same for test DB
+castor database:migrate          # Run migrations
+castor database:make-migration   # Create new migration
+```
+
+### Command Structure
+
+Commands are organized by namespace in `tools/castor/Commands/`:
+
+- **`App.php`** - Application commands (`app:*`, `cache:*`, quality tools)
+- **`Docker.php`** - Docker management (`docker:*`, `bash`)
+- **`Project.php`** - Project initialization (`project:init`)
+
+**Example command:**
+```php
+#[AsTask(description: 'Clear Symfony cache', namespace: 'cache', aliases: ['cc'])]
+function clear(): void
+{
+    (new DockerCommandBuilder())
+        ->withAllServices()
+        ->service('server')
+        ->exec('php bin/console cache:clear');
+}
+```
+
+### Configurations
+
+- **PHPStan:** `tools/phpstan.neon` - Analyzes `/var/www/project` (app/ mounted in container)
+- **PHP CS Fixer:** `tools/.php-cs-fixer.php` - Analyzes `/var/www/project` (app/ mounted in container)
+- **Docker services:** `infrastructure/dev/services/{service}/{service}.yml`
+- **Service enum:** `tools/castor/Enum/Service.php` - Knows all service paths
+
+**Note:** In the container, `app/` is mounted as `/var/www/project` and `tools/` as `/var/www/tools`.
 
 ## Development Workflow
 
 **Quality Checklist (must pass before committing):**
 ```bash
-make phpcs   # Fix code style (PSR-12)
-make phpstan # Check type errors
-make phpunit # Run tests (use `make reload-tests` if needed)
+castor app:phpcs   # Fix code style (PSR-12)
+castor app:phpstan # Check type errors
+castor app:phpunit # Run tests (use `castor database:reload-tests` if needed)
+```
+
+**Or run all at once:**
+```bash
+castor app:qa      # Runs phpcs, phpstan, phpunit
 ```
 
 **Steps:** Develop → Write tests → Run quality checks
@@ -73,7 +171,7 @@ class UserController
 ```
 
 **Organize `use` statements:** Symfony → Doctrine → Third-party → App namespace (separated by blank lines).  
-**Note:** `make phpcs` auto-organizes imports.
+**Note:** `castor app:phpcs` auto-organizes imports.
 
 ### Doctrine Type Constants
 
@@ -204,7 +302,7 @@ public function create(Request $request, CreateUserAction $action): Response
 **Three test categories:**
 
 ### 1. Smoke Tests (`tests/Smoke/`)
-Fast sanity checks (health checks, critical endpoints, boot verification).
+Fast sanity checks - verify pages/endpoints load without errors (HTTP 200/201/etc). NO business logic testing.
 
 ### 2. Unit Tests (`tests/Unit/`)
 Test individual classes/methods in isolation using mocks. Focus on business logic.
@@ -212,12 +310,14 @@ Test individual classes/methods in isolation using mocks. Focus on business logi
 ### 3. Functional Tests (`tests/Functional/`)
 Test complete workflows with real database and HTTP requests (API endpoints, form submissions).
 
+**⚠️ NO TEST REDUNDANCY:** Test each logic ONCE at appropriate level. Smoke = loading only. Unit = isolated logic. Functional = complete workflows.
+
 ## Summary
 
-- ✅ **ALWAYS use Docker via Makefile** - Never run binaries directly
-- ✅ **Run quality checks before commit** - `make phpcs`, `make phpstan`, `make phpunit`
+- ✅ **ALWAYS use Docker via Castor** - Never run binaries directly
+- ✅ **Run quality checks before commit** - `castor app:qa` or individual commands
 - ✅ **Ask for clarification when unclear** - Better to ask than develop incorrectly
 - ✅ **Use FQCN with `use` statements** - Never inline FQCN or omit imports
 - ✅ **Use constants** - `Types::*`, `Request::METHOD_*`, `Response::HTTP_*` (no strings/magic numbers)
-- ✅ **Place business logic in Action classes** - `src/Action` directory
-- ✅ **Organize tests** - Smoke, Unit, Functional directories
+- ✅ **Place business logic in Action classes** - `app/src/Action` directory
+- ✅ **Organize tests** - Smoke, Unit, Functional directories (NO redundancy)

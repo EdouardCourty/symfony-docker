@@ -1,0 +1,28 @@
+name: {{ project_name }}
+
+services:
+  database:
+    image: postgres:18-alpine
+    container_name: '{{ project_name }}_database'
+    env_file:
+      - ./services/database/.env
+    ports:
+      - target: 5432
+        published: {{ postgres_port }}
+        protocol: tcp
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  database:
+    driver: local
+
+networks:
+  default:
+    name: {{ project_name }}_network
+    external: true

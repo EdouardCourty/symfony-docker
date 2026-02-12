@@ -17,37 +17,57 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.4
 
       - name: Initialise repository
         uses: actions/checkout@v4
 
-      - name: Validate composer.json and composer.lock
+      - name: Validate composer.json and composer.lock (app)
+        working-directory: app
         run: composer validate --strict
 
-      - name: Audit dependencies
+      - name: Audit dependencies (app)
+        working-directory: app
         run: composer audit --no-dev --locked
 
-      - name: Cache Composer packages
-        id: composer-cache
+      - name: Cache Composer packages (app)
+        id: composer-cache-app
         uses: actions/cache@v3
         with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          path: app/vendor
+          key: ${{ runner.os }}-php-app-${{ hashFiles('app/composer.lock') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-php-app-
 
-      - name: Install dependencies
+      - name: Install dependencies (app)
+        working-directory: app
+        run: composer install --prefer-dist --no-progress
+
+      - name: Cache Composer packages (tools)
+        id: composer-cache-tools
+        uses: actions/cache@v3
+        with:
+          path: tools/vendor
+          key: ${{ runner.os }}-php-tools-${{ hashFiles('tools/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-tools-
+
+      - name: Install dependencies (tools)
+        working-directory: tools
         run: composer install --prefer-dist --no-progress
 
       - name: Run PHPStan
-        run: php vendor/bin/phpstan
+        working-directory: tools
+        run: php vendor/bin/phpstan --memory-limit=-1
 
-      - name: Run PHP CS FIXER
-        run: php vendor/bin/php-cs-fixer check
+      - name: Run PHP CS Fixer
+        working-directory: tools
+        run: PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer check
 
       - name: Check Doctrine / DB scheme
+        working-directory: app
         run: php bin/console doctrine:schema:validate -v --skip-sync
 
       - name: Run PHPUnit
-        run: php bin/phpunit
+        working-directory: app
+        run: php vendor/bin/phpunit

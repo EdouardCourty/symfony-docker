@@ -1,0 +1,12 @@
+parameters:
+	level: 8
+	paths:
+		- ../project/src
+		- ../project/tests
+	bootstrapFiles:
+		- ../project/vendor/autoload.php
+	scanDirectories:
+		- ../project/vendor
+	ignoreErrors:
+		-
+			identifier: missingType.generics

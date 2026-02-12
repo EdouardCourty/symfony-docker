@@ -17,9 +17,9 @@ RUN apk update && apk add \
     libpq \
     postgresql-dev
 
-COPY docker/dev/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.conf
-COPY docker/dev/php/php.ini /usr/local/etc/php/php.ini
-COPY docker/dev/php/opcache.ini /usr/local/etc/php/conf.d
+COPY infrastructure/dev/configurations/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.conf
+COPY infrastructure/dev/configurations/php/configuration/php.ini /usr/local/etc/php/php.ini
+COPY infrastructure/dev/configurations/php/configuration/opcache.ini /usr/local/etc/php/conf.d
 
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
 
