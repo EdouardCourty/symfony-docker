@@ -8,7 +8,7 @@ use Castor\Attribute\AsTask;
 
 use function Castor\io;
 
-#[AsTask(description: 'Initialize a new project from templates', namespace: 'project')]
+#[AsTask(namespace: 'project', description: 'Initialize a new project from templates')]
 function init(): void
 {
     io()->title('🚀 Project Initialization');

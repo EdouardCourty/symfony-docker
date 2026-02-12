@@ -13,7 +13,7 @@ use Tools\Castor\Builder\DockerCommandBuilder;
 use function Castor\io;
 
 // Cache commands
-#[AsTask(description: 'Clear Symfony cache', namespace: 'cache', aliases: ['cc'])]
+#[AsTask(namespace: 'cache', description: 'Clear Symfony cache', aliases: ['cc'])]
 function clear(): void
 {
     (new DockerCommandBuilder())
@@ -23,7 +23,7 @@ function clear(): void
 }
 
 // Database commands
-#[AsTask(description: 'Reload database with fixtures', namespace: 'database')]
+#[AsTask(namespace: 'database', description: 'Reload database with fixtures')]
 function reload(): void
 {
     (new DockerCommandBuilder())
@@ -47,7 +47,7 @@ function reload(): void
         ->exec('php bin/console hautelook:fixtures:load --no-interaction');
 }
 
-#[AsTask(description: 'Reload test database with fixtures', namespace: 'database')]
+#[AsTask(namespace: 'database', description: 'Reload test database with fixtures')]
 function reload_tests(): void
 {
     (new DockerCommandBuilder())
@@ -71,7 +71,7 @@ function reload_tests(): void
         ->exec('php bin/console hautelook:fixtures:load --env=test --no-interaction');
 }
 
-#[AsTask(description: 'Run database migrations', namespace: 'database')]
+#[AsTask(namespace: 'database', description: 'Run database migrations')]
 function migrate(): void
 {
     (new DockerCommandBuilder())
@@ -80,7 +80,7 @@ function migrate(): void
         ->exec('php bin/console doctrine:migrations:migrate --no-interaction');
 }
 
-#[AsTask(description: 'Create a new migration', namespace: 'database')]
+#[AsTask(namespace: 'database', description: 'Create a new migration')]
 function make_migration(): void
 {
     (new DockerCommandBuilder())
@@ -89,7 +89,7 @@ function make_migration(): void
         ->exec('php bin/console make:migration');
 }
 
-#[AsTask(description: 'Drop database', namespace: 'database')]
+#[AsTask(namespace: 'database', description: 'Drop database')]
 function drop(): void
 {
     (new DockerCommandBuilder())
@@ -98,7 +98,7 @@ function drop(): void
         ->exec('php bin/console doctrine:database:drop --force');
 }
 
-#[AsTask(description: 'Create database', namespace: 'database')]
+#[AsTask(namespace: 'database', description: 'Create database')]
 function create(): void
 {
     (new DockerCommandBuilder())
@@ -107,7 +107,7 @@ function create(): void
         ->exec('php bin/console doctrine:database:create');
 }
 
-#[AsTask(description: 'Load fixtures', namespace: 'database')]
+#[AsTask(namespace: 'database', description: 'Load fixtures')]
 function load_fixtures(): void
 {
     (new DockerCommandBuilder())
@@ -117,7 +117,7 @@ function load_fixtures(): void
 }
 
 // Quality commands
-#[AsTask(description: 'Run PHP CS Fixer', namespace: 'app', aliases: ['app:phpcs'])]
+#[AsTask(namespace: 'app', description: 'Run PHP CS Fixer', aliases: ['app:phpcs'])]
 function php_cs_fixer(): void
 {
     (new DockerCommandBuilder())
@@ -127,7 +127,7 @@ function php_cs_fixer(): void
         ->exec('vendor/bin/php-cs-fixer fix');
 }
 
-#[AsTask(description: 'Run PHPStan static analysis', namespace: 'app')]
+#[AsTask(namespace: 'app', description: 'Run PHPStan static analysis')]
 function phpstan(
     #[AsArgument(description: 'Additional arguments for PHPStan')]
     ?string $args = null
@@ -147,7 +147,7 @@ function phpstan(
 }
 
 // Test commands
-#[AsTask(description: 'Run PHPUnit tests', namespace: 'app')]
+#[AsTask(namespace: 'app', description: 'Run PHPUnit tests')]
 function phpunit(
     #[AsArgument(description: 'Test file path (e.g., tests/Unit/SomeTest.php)')]
     ?string $path = null,
@@ -172,7 +172,7 @@ function phpunit(
 }
 
 // QA command
-#[AsTask(description: 'Run all quality checks (phpcs, phpstan, phpunit)', namespace: 'app', aliases: ['qa'])]
+#[AsTask(namespace: 'app', description: 'Run all quality checks (phpcs, phpstan, phpunit)', aliases: ['qa'])]
 function qa(): void
 {
     io()->title('Running Quality Assurance checks');

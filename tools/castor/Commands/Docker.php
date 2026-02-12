@@ -11,7 +11,7 @@ use Tools\Castor\Enum\ProjectFolder;
 use Tools\Castor\Enum\Service;
 use Tools\Castor\Builder\DockerCommandBuilder;
 
-#[AsTask(description: 'Start Docker containers', namespace: 'docker', aliases: ['start'])]
+#[AsTask(namespace: 'docker', description: 'Start Docker containers', aliases: ['start'])]
 function start(
     #[AsArgument(description: 'Services to start (database, server, proxy). Leave empty for all')]
     array $services = [],
@@ -29,14 +29,14 @@ function start(
     $builder->up();
 }
 
-#[AsTask(description: 'Stop Docker containers', namespace: 'docker', aliases: ['stop'])]
+#[AsTask(namespace: 'docker', description: 'Stop Docker containers', aliases: ['stop'])]
 function stop(
     #[AsArgument(description: 'Services to stop (database, server, proxy). Leave empty for all')]
     ?array $services = null,
 ): void {
     $builder = new DockerCommandBuilder();
 
-    if ($services === null || empty($services)) {
+    if (empty($services)) {
         $builder->withAllServices();
     } else {
         $builder->withServices(Service::fromNames($services));
@@ -45,7 +45,7 @@ function stop(
     $builder->stop();
 }
 
-#[AsTask(description: 'Stop and remove Docker containers', namespace: 'docker', aliases: ['down'])]
+#[AsTask(namespace: 'docker', description: 'Stop and remove Docker containers', aliases: ['down'])]
 function down(
     #[AsOption(shortcut: 'v', description: 'Remove volumes')]
     bool $volumes = false,
@@ -56,14 +56,14 @@ function down(
         ->down();
 }
 
-#[AsTask(description: 'Build Docker containers', namespace: 'docker')]
+#[AsTask(namespace: 'docker', description: 'Build Docker containers')]
 function build(
     #[AsArgument(description: 'Services to build (database, server, proxy). Leave empty for all')]
     ?array $services = null,
 ): void {
     $builder = new DockerCommandBuilder();
 
-    if ($services === null || empty($services)) {
+    if (empty($services)) {
         $builder->withAllServices();
     } else {
         $builder->withServices(Service::fromNames($services));
@@ -72,14 +72,14 @@ function build(
     $builder->build();
 }
 
-#[AsTask(description: 'Restart Docker containers', namespace: 'docker', aliases: ['restart'])]
+#[AsTask(namespace: 'docker', description: 'Restart Docker containers', aliases: ['restart'])]
 function restart(
     #[AsArgument(description: 'Services to restart (database, server, proxy). Leave empty for all')]
     ?array $services = null,
 ): void {
     $builder = new DockerCommandBuilder();
 
-    if ($services === null || empty($services)) {
+    if (empty($services)) {
         $builder->withAllServices();
     } else {
         $builder->withServices(Service::fromNames($services));
@@ -106,13 +106,13 @@ function bash(
         ->exec('ash');
 }
 
-#[AsTask(description: 'List Docker containers status', namespace: 'docker', aliases: ['ps'])]
+#[AsTask(namespace: 'docker', description: 'List Docker containers status', aliases: ['ps'])]
 function ps(): void
 {
     (new DockerCommandBuilder())->withAllServices()->ps();
 }
 
-#[AsTask(description: 'Show Docker container logs', namespace: 'docker', aliases: ['logs'])]
+#[AsTask(namespace: 'docker', description: 'Show Docker container logs', aliases: ['logs'])]
 function logs(
     #[AsArgument(description: 'Service name (server, proxy, database)')]
     ?string $service = null,
