@@ -215,3 +215,138 @@ function install(
         reload();
     }
 }
+
+// AI Mate commands
+#[AsTask(namespace: 'mate', description: 'Setup MCP configuration file with absolute project path')]
+function setup(): void
+{
+    $projectRoot = getcwd();
+    $exampleFile = $projectRoot . '/mcp.json.example';
+    $targetFile = $projectRoot . '/mcp.json';
+    
+    if (!file_exists($exampleFile)) {
+        io()->error('mcp.json.example not found at project root');
+        return;
+    }
+    
+    if (file_exists($targetFile)) {
+        $overwrite = io()->confirm('mcp.json already exists. Overwrite?', false);
+        if (!$overwrite) {
+            io()->note('Setup cancelled. Existing mcp.json was not modified.');
+            return;
+        }
+    }
+    
+    $content = file_get_contents($exampleFile);
+    $content = str_replace('{{ absolute_path }}', $projectRoot, $content);
+    
+    file_put_contents($targetFile, $content);
+    
+    // Create .mcp.json symlink for auto-discovery
+    $symlinkFile = $projectRoot . '/.mcp.json';
+    if (file_exists($symlinkFile) || is_link($symlinkFile)) {
+        unlink($symlinkFile);
+    }
+    symlink('mcp.json', $symlinkFile);
+    
+    io()->success('MCP configuration created successfully!');
+    io()->table(
+        ['File', 'Path'],
+        [
+            ['mcp.json', $targetFile],
+            ['.mcp.json', $symlinkFile . ' → mcp.json'],
+            ['Project root', $projectRoot],
+        ]
+    );
+    
+    io()->note([
+        'Next steps:',
+        '1. Configure your AI assistant to use this MCP server',
+        '2. Run "castor mate:call php-version \'{}\'" to test',
+        '3. See AI_MATE_SETUP.md for AI assistant configuration',
+    ]);
+}
+
+#[AsTask(namespace: 'mate', description: 'Start AI Mate MCP server (for AI assistants on host)')]
+function serve(
+    #[AsOption(description: 'Enable debug mode with verbose logging')]
+    bool $debug = false
+): void
+{
+    $builder = (new DockerCommandBuilder())
+        ->withAllServices()
+        ->service('server')
+        ->workdir('/var/www/project');
+    
+    if ($debug) {
+        $builder->env([
+            'MATE_DEBUG' => '1',
+            'MATE_DEBUG_FILE' => '1',
+            'MATE_DEBUG_LOG_FILE' => '/var/www/project/mate_inner.log',
+        ]);
+    }
+    
+    // Redirect stderr to /dev/null to keep stdout clean for MCP JSON-RPC protocol
+    // unless debug mode is enabled (for logging to file)
+    $command = $debug 
+        ? 'vendor/bin/mate serve --force-keep-alive'
+        : 'vendor/bin/mate serve --force-keep-alive 2>/dev/null';
+    
+    $builder->noTty()->exec($command);
+}
+
+#[AsTask(namespace: 'mate', description: 'List all available MCP tools')]
+function tools(): void
+{
+    (new DockerCommandBuilder())
+        ->withAllServices()
+        ->service('server')
+        ->noTty()
+        ->exec('vendor/bin/mate mcp:tools:list');
+}
+
+#[AsTask(namespace: 'mate', description: 'Show all MCP capabilities (tools, resources, prompts)')]
+function capabilities(): void
+{
+    (new DockerCommandBuilder())
+        ->withAllServices()
+        ->service('server')
+        ->noTty()
+        ->exec('vendor/bin/mate debug:capabilities');
+}
+
+#[AsTask(namespace: 'mate', description: 'Show detailed extension information')]
+function extensions(): void
+{
+    (new DockerCommandBuilder())
+        ->withAllServices()
+        ->service('server')
+        ->noTty()
+        ->exec('vendor/bin/mate debug:extensions');
+}
+
+#[AsTask(namespace: 'mate', description: 'Discover and update MCP extensions')]
+function discover(): void
+{
+    (new DockerCommandBuilder())
+        ->withAllServices()
+        ->service('server')
+        ->noTty()
+        ->exec('vendor/bin/mate discover');
+}
+
+#[AsTask(namespace: 'mate', description: 'Call a specific MCP tool')]
+function call(
+    #[AsArgument(description: 'Tool name to call')]
+    string $tool,
+    #[AsArgument(description: 'JSON parameters for the tool')]
+    string $params = '{}'
+): void
+{
+    $escapedParams = addslashes($params);
+    (new DockerCommandBuilder())
+        ->withAllServices()
+        ->service('server')
+        ->noTty()
+        ->exec(sprintf("vendor/bin/mate mcp:tools:call %s '%s'", $tool, $escapedParams));
+}

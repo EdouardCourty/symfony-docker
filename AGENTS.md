@@ -14,6 +14,7 @@ This document outlines the development best practices and conventions for this S
 - [EasyAdmin](#easyadmin)
 - [Reusable Business Logic](#reusable-business-logic)
 - [Testing Structure](#testing-structure)
+- [AI Mate Integration](#ai-mate-integration)
 
 ## Project Structure
 
@@ -94,6 +95,15 @@ castor database:reload           # Drop, create, migrate, load fixtures
 castor database:reload-tests     # Same for test DB
 castor database:migrate          # Run migrations
 castor database:make-migration   # Create new migration
+```
+
+**AI Mate (MCP Server):**
+```bash
+castor mate:setup       # Setup MCP config (run once)
+castor mate:serve       # Start MCP server
+castor mate:tools       # List available tools
+castor mate:capabilities  # Show all capabilities
+castor mate:call <tool> <json>  # Call a specific tool
 ```
 
 ### Command Structure
@@ -311,6 +321,74 @@ Test individual classes/methods in isolation using mocks. Focus on business logi
 Test complete workflows with real database and HTTP requests (API endpoints, form submissions).
 
 **⚠️ NO TEST REDUNDANCY:** Test each logic ONCE at appropriate level. Smoke = loading only. Unit = isolated logic. Functional = complete workflows.
+
+## AI Mate Integration
+
+**Symfony AI Mate provides an MCP (Model Context Protocol) server for AI assistants to interact with the application during development.**
+
+### What is AI Mate?
+
+AI Mate enables AI assistants (GitHub Copilot, Claude, Cursor, etc.) to:
+- Access **Symfony Profiler data** (requests, queries, events, exceptions)
+- Search and analyze **application logs** (Monolog)
+- Inspect **Symfony services** (container introspection)
+- Get **PHP environment info** (version, extensions, OS)
+
+⚠️ **Development only** - NOT for production use.
+
+### Available Tools
+
+**Core tools (symfony/ai-mate):**
+- `php-version`, `operating-system`, `operating-system-family`, `php-extensions`
+
+**Symfony bridge (symfony/ai-symfony-mate-extension):**
+- `symfony-profiler-list`, `symfony-profiler-latest`, `symfony-profiler-search`, `symfony-profiler-get`
+- `symfony-services`
+- Resources: `symfony-profiler://profile/{token}`, `symfony-profiler://profile/{token}/{collector}`
+
+**Monolog bridge (symfony/ai-monolog-mate-extension):**
+- `monolog-search`, `monolog-search-regex`, `monolog-context-search`, `monolog-tail`
+- `monolog-list-files`, `monolog-list-channels`, `monolog-by-level`
+
+### Usage
+
+**Start MCP server:**
+```bash
+castor mate:serve
+```
+
+**List tools:**
+```bash
+castor mate:tools
+```
+
+**Test a tool:**
+```bash
+castor mate:call php-version '{}'
+castor mate:call symfony-profiler-latest '{}'
+```
+
+### Configuration
+
+Configuration files are in `app/mate/`:
+- `config.php` - Service configuration (cache, profiler, log directories)
+- `extensions.php` - Enable/disable extensions
+- `src/` - Custom MCP tools/resources/prompts
+- `README.md` - Full documentation
+
+The `mcp.json` file at `app/mcp.json` contains the MCP client configuration.
+
+**Important:** The MCP server runs in the Docker container, but AI assistants run on the host. Use `castor mate:serve` which properly bridges the container's stdio to the host. The `mcp.json` file at the project root contains the configuration:
+
+```json
+{
+  "command": "castor",
+  "args": ["mate:serve"],
+  "cwd": "/absolute/path/to/symfony-docker"
+}
+```
+
+Copy `mcp.json.example` to `mcp.json` and update the path. See `AI_MATE_SETUP.md` and `app/mate/README.md` for detailed client configuration (Copilot, Claude, Cursor).
 
 ## Summary
 

@@ -26,6 +26,8 @@ final class DockerCommandBuilder
     private bool $tty = true; // TTY enabled by default
     /** @var Service[] */
     private array $services = [];
+    /** @var array<string, string> */
+    private array $env = [];
 
     public function __construct()
     {
@@ -117,6 +119,16 @@ final class DockerCommandBuilder
         return $this;
     }
 
+    /**
+     * @param array<string, string> $env
+     */
+    public function env(array $env): self
+    {
+        $this->env = array_merge($this->env, $env);
+
+        return $this;
+    }
+
     private function buildBaseCommand(): string
     {
         $files = array_map(fn (string $file) => "-f {$file}", $this->composeFiles);
@@ -194,6 +206,12 @@ final class DockerCommandBuilder
 
         if ($this->tty) {
             $options[] = '-it';
+        } else {
+            $options[] = '-T';
+        }
+
+        foreach ($this->env as $key => $value) {
+            $options[] = \sprintf('--env %s=%s', escapeshellarg($key), escapeshellarg($value));
         }
 
         if ($this->workdir !== null) {

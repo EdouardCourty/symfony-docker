@@ -41,3 +41,10 @@ docker-compose.yml
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
+
+###> symfony/ai-mate ###
+/mate/.env.local
+###< symfony/ai-mate ###
+
+mate_inner.log
+mate.log
