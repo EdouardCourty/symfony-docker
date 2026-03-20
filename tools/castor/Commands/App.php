@@ -127,6 +127,16 @@ function php_cs_fixer(): void
         ->exec('vendor/bin/php-cs-fixer fix');
 }
 
+#[AsTask(namespace: 'app', name: 'twig-cs-fixer', description: 'Run Twig CS Fixer on app templates')]
+function twig_cs_fixer(): void
+{
+    (new DockerCommandBuilder())
+        ->withAllServices()
+        ->service('server')
+        ->workdir('/var/www/tools')
+        ->exec('vendor/bin/twig-cs-fixer fix --config=.twig-cs-fixer.php /var/www/project/templates');
+}
+
 #[AsTask(namespace: 'app', description: 'Run PHPStan static analysis')]
 function phpstan(
     #[AsArgument(description: 'Additional arguments for PHPStan')]
@@ -172,20 +182,23 @@ function phpunit(
 }
 
 // QA command
-#[AsTask(namespace: 'app', description: 'Run all quality checks (phpcs, phpstan, phpunit)', aliases: ['qa'])]
+#[AsTask(namespace: 'app', description: 'Run all quality checks (phpcs, twig-cs-fixer, phpstan, phpunit)', aliases: ['qa'])]
 function qa(): void
 {
     io()->title('Running Quality Assurance checks');
-    
-    io()->section('1/3 - PHP CS Fixer');
+
+    io()->section('1/4 - PHP CS Fixer');
     php_cs_fixer();
-    
-    io()->section('2/3 - PHPStan');
+
+    io()->section('2/4 - Twig CS Fixer');
+    twig_cs_fixer();
+
+    io()->section('3/4 - PHPStan');
     phpstan(null);
-    
-    io()->section('3/3 - PHPUnit');
+
+    io()->section('4/4 - PHPUnit');
     phpunit(null, null);
-    
+
     io()->success('All QA checks completed!');
 }
 

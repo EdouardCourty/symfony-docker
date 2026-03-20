@@ -18,4 +18,3 @@ services:
 networks:
   default:
     name: {{ project_name }}_network
-    external: true

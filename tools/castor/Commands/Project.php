@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tools\Castor\Commands;
 
+use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
 
 use function Castor\io;
+use function Castor\run;
 
 #[AsTask(namespace: 'project', description: 'Initialize a new project from templates')]
 function init(): void
@@ -109,5 +111,48 @@ function init(): void
     ]);
 
     io()->success('🎉 Project initialized successfully!');
+}
+
+#[AsTask(namespace: 'project', description: 'Start the full stack and initialize the database')]
+function reset(): void
+{
+    io()->title('🔄 Starting full stack');
+
+    io()->section('1/3 - Starting Docker services');
+    start();
+
+    io()->section('2/3 - Installing dependencies');
+    install('all');
+
+    io()->section('3/3 - Initializing database');
+    reload();
+
+    io()->success('✅ Stack is up and ready!');
+}
+
+#[AsTask(namespace: 'project', description: 'Add a hostname to /etc/hosts (requires sudo)')]
+function hosts(
+    #[AsOption(description: 'Hostname to add')]
+    ?string $hostname = null,
+): void {
+    if ($hostname === null) {
+        $hostname = io()->ask('Hostname to add to /etc/hosts', 'app.local');
+    }
+
+    $hostsFile = '/etc/hosts';
+    $entry = "127.0.0.1 {$hostname}";
+
+    $contents = \file_get_contents($hostsFile);
+
+    if (\str_contains($contents, $hostname)) {
+        io()->success("{$hostname} is already in {$hostsFile} — nothing to do.");
+        return;
+    }
+
+    io()->writeln("Adding <info>{$entry}</info> to {$hostsFile}...");
+
+    run(['sudo', 'sh', '-c', "echo '{$entry}' >> {$hostsFile}"]);
+
+    io()->success("{$hostname} added to {$hostsFile}.");
 }
 

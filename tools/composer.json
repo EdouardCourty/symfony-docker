@@ -11,6 +11,7 @@
         "phpstan/phpstan": "^2",
         "phpstan/phpstan-doctrine": "^2",
         "phpstan/phpstan-phpunit": "^2",
-        "friendsofphp/php-cs-fixer": "^3.66"
+        "friendsofphp/php-cs-fixer": "^3.66",
+        "vincentlanglet/twig-cs-fixer": "^3.14"
     }
 }

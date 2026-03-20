@@ -76,6 +76,8 @@ function build(
 function restart(
     #[AsArgument(description: 'Services to restart (database, server, proxy). Leave empty for all')]
     ?array $services = null,
+    #[AsOption(description: 'Force recreate containers')]
+    bool $forceRecreate = false,
 ): void {
     $builder = new DockerCommandBuilder();
 
@@ -85,7 +87,7 @@ function restart(
         $builder->withServices(Service::fromNames($services));
     }
 
-    $builder->restart();
+    $builder->restart($forceRecreate);
 }
 
 #[AsTask(description: 'Open bash on server container', namespace: '', aliases: ['bash'])]

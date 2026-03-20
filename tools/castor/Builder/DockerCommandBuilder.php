@@ -23,6 +23,7 @@ final class DockerCommandBuilder
     private ?string $service = null;
     private ?string $workdir = null;
     private bool $removeContainer = false;
+    private bool $servicePorts = false;
     private bool $tty = true; // TTY enabled by default
     /** @var Service[] */
     private array $services = [];
@@ -101,6 +102,13 @@ final class DockerCommandBuilder
     public function removeContainer(bool $remove = true): self
     {
         $this->removeContainer = $remove;
+
+        return $this;
+    }
+
+    public function servicePorts(bool $servicePorts = true): self
+    {
+        $this->servicePorts = $servicePorts;
 
         return $this;
     }
@@ -190,10 +198,26 @@ final class DockerCommandBuilder
         run($this->buildBaseCommand() . ' build', context: $context);
     }
 
-    public function restart(): void
+    public function restart(bool $forceRecreate = false): void
     {
+        if ($forceRecreate) {
+            $command = $this->buildBaseCommand() . ' up --detach --force-recreate';
+
+            if (!empty($this->services)) {
+                $serviceNames = array_map(fn (Service $s) => $s->getServiceName(), $this->services);
+                $command .= ' ' . implode(' ', $serviceNames);
+            }
+        } else {
+            $command = $this->buildBaseCommand() . ' restart';
+
+            if (!empty($this->services)) {
+                $serviceNames = array_map(fn (Service $s) => $s->getServiceName(), $this->services);
+                $command .= ' ' . implode(' ', $serviceNames);
+            }
+        }
+
         $context = $this->tty ? context()->withTty(true) : context();
-        run($this->buildBaseCommand() . ' restart', context: $context);
+        run($command, context: $context);
     }
 
     public function exec(string $command): void
@@ -230,7 +254,7 @@ final class DockerCommandBuilder
         run($execCommand, context: $context);
     }
 
-    public function runCommand(string $command): void
+    public function runCommand(string $command, bool $detached = false): void
     {
         if ($this->service === null) {
             throw new \LogicException('Service must be set before calling runCommand()');
@@ -238,8 +262,16 @@ final class DockerCommandBuilder
 
         $options = [];
 
+        if ($detached) {
+            $options[] = '--detach';
+        }
+
         if ($this->removeContainer) {
             $options[] = '--rm';
+        }
+
+        if ($this->servicePorts) {
+            $options[] = '--service-ports';
         }
 
         if ($this->workdir !== null) {
@@ -253,7 +285,7 @@ final class DockerCommandBuilder
             $command,
         );
 
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = ($this->tty && !$detached) ? context()->withTty(true) : context();
         run($runCommand, context: $context);
     }
 
