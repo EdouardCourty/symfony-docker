@@ -46,6 +46,13 @@ function init(): void
         return (string) $answer;
     });
 
+    $hostname = io()->ask('Local hostname (will be added to /etc/hosts)', 'app.local', function ($answer) {
+        if (!preg_match('/^[a-z0-9.-]+$/', $answer)) {
+            throw new \RuntimeException('Hostname must be lowercase with dots and hyphens only');
+        }
+        return $answer;
+    });
+
     $databaseName = io()->ask('Database name', 'main_dev');
     $databaseUser = io()->ask('Database user', 'app');
     $databasePassword = io()->ask('Database password', 'app');
@@ -58,6 +65,7 @@ function init(): void
             ['Project Name', $projectName],
             ['Nginx Port', $nginxPort],
             ['PostgreSQL Port', $postgresPort],
+            ['Hostname', $hostname],
             ['Database Name', $databaseName],
             ['Database User', $databaseUser],
             ['Database Password', $databasePassword],
@@ -74,6 +82,7 @@ function init(): void
         '{{ project_name }}' => $projectName,
         '{{ nginx_port }}' => $nginxPort,
         '{{ postgres_port }}' => $postgresPort,
+        '{{ hostname }}' => $hostname,
         '{{ database_name }}' => $databaseName,
         '{{ database_user }}' => $databaseUser,
         '{{ database_password }}' => $databasePassword,
@@ -88,6 +97,7 @@ function init(): void
         'infrastructure/dev/services/database/database.yml.dist' => 'infrastructure/dev/services/database/database.yml',
         'infrastructure/dev/services/server/server.yml.dist' => 'infrastructure/dev/services/server/server.yml',
         'infrastructure/dev/services/proxy/proxy.yml.dist' => 'infrastructure/dev/services/proxy/proxy.yml',
+        'infrastructure/dev/configurations/nginx/project_local.conf.dist' => 'infrastructure/dev/configurations/nginx/project_local.conf',
     ];
 
     foreach ($templates as $source => $destination) {
@@ -103,10 +113,16 @@ function init(): void
         io()->success("✓ Generated {$destination}");
     }
 
+    io()->section('Generating SSL certificates');
+    generate(hostname: $hostname, trust: true);
+
+    io()->section('Configuring /etc/hosts');
+    hosts($hostname);
+
     io()->section('Next steps');
     io()->listing([
         'Run "castor install" to build and start the project',
-        'Access the application at http://localhost:' . $nginxPort,
+        "Access the application at https://{$hostname}:{$nginxPort}",
         'Connect to database at localhost:' . $postgresPort,
     ]);
 

@@ -12,7 +12,7 @@ use function Castor\run;
 
 #[AsTask(namespace: 'ssl', description: 'Generate self-signed SSL certificates for local HTTPS')]
 function generate(
-    #[AsOption(description: 'Hostname for the certificate')]
+    #[AsOption(description: 'Hostname for the certificate (e.g. arcane.local)')]
     string $hostname = 'app.local',
     #[AsOption(description: 'Automatically trust the certificate after generation (macOS only)')]
     bool $trust = false,
@@ -24,12 +24,15 @@ function generate(
     run([
         'openssl', 'req',
         '-x509', '-nodes',
-        '-newkey', 'rsa',
+        '-newkey', 'rsa:2048',
+        '-days', '3650',
+        '-keyout', "{$sslDir}/{$hostname}.key",
         '-out', "{$sslDir}/{$hostname}.crt",
-        '-config', "{$sslDir}/openssl.cnf",
+        '-subj', "/C=FR/ST=Ile-de-France/L=Paris/O=Project/CN={$hostname}",
+        '-addext', "subjectAltName=DNS:{$hostname},DNS:*.{$hostname}",
     ]);
 
-    io()->success('SSL certificate generated.');
+    io()->success("SSL certificate generated: {$sslDir}/{$hostname}.{crt,key}");
 
     if ($trust) {
         trust($hostname);
@@ -51,6 +54,7 @@ function trust(
         }
 
         generate($hostname);
+        return;
     }
 
     io()->writeln('Adding SSL certificate to macOS keychain...');

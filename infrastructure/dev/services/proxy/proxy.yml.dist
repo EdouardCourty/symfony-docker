@@ -5,11 +5,12 @@ services:
     image: nginx:alpine3.18
     container_name: '{{ project_name }}_proxy'
     ports:
-      - target: 80
+      - target: 443
         published: {{ nginx_port }}
         protocol: tcp
     volumes:
       - ./configurations/nginx:/etc/nginx/conf.d
+      - ./configurations/nginx/ssl:/etc/nginx/ssl
       - ../../app/public:/var/www/project/public
     depends_on:
       - server

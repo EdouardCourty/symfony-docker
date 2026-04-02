@@ -56,7 +56,7 @@ function down(
         ->down();
 }
 
-#[AsTask(namespace: 'docker', description: 'Build Docker containers')]
+#[AsTask(namespace: 'docker', description: 'Build Docker containers', aliases: ['build'])]
 function build(
     #[AsArgument(description: 'Services to build (database, server, proxy). Leave empty for all')]
     ?array $services = null,
