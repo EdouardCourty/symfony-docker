@@ -47,7 +47,7 @@ function stop(
 
 #[AsTask(namespace: 'docker', description: 'Stop and remove Docker containers', aliases: ['down'])]
 function down(
-    #[AsOption(shortcut: 'v', description: 'Remove volumes')]
+    #[AsOption(shortcut: 'volumes', description: 'Remove volumes')]
     bool $volumes = false,
 ): void {
     (new DockerCommandBuilder())
