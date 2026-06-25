@@ -1,12 +1,12 @@
 parameters:
 	level: 8
 	paths:
-		- ../project/src
-		- ../project/tests
+		- ../app/src
+		- ../app/tests
 	bootstrapFiles:
-		- ../project/vendor/autoload.php
+		- ../app/vendor/autoload.php
 	scanDirectories:
-		- ../project/vendor
+		- ../app/vendor
 	ignoreErrors:
 		-
 			identifier: missingType.generics

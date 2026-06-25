@@ -13,7 +13,7 @@ enum ProjectFolder: string
     public function getPath(): string
     {
         return match ($this) {
-            self::APP => '/var/www/project',
+            self::APP => '/var/www/app',
             self::TOOLS => '/var/www/tools',
             self::ALL => throw new \LogicException('ALL is not a single path'),
         };

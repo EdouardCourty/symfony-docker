@@ -1,0 +1,9 @@
+# Tuning PostgreSQL pour un petit VPS (1 Go RAM), seul service sur la machine, faible trafic.
+# Valeurs conservatrices — ajuste-les si le serveur a plus de RAM ou de trafic.
+# Déployé par server_setup.sh dans /etc/postgresql/<version>/main/conf.d/.
+
+max_connections = 20
+shared_buffers = 128MB
+effective_cache_size = 384MB
+work_mem = 4MB
+maintenance_work_mem = 32MB

@@ -134,7 +134,7 @@ function twig_cs_fixer(): void
         ->withAllServices()
         ->service('server')
         ->workdir('/var/www/tools')
-        ->exec('vendor/bin/twig-cs-fixer fix --config=.twig-cs-fixer.php /var/www/project/templates');
+        ->exec('vendor/bin/twig-cs-fixer fix --config=.twig-cs-fixer.php /var/www/app/templates');
 }
 
 #[AsTask(namespace: 'app', description: 'Run PHPStan static analysis')]
@@ -289,13 +289,13 @@ function serve(
     $builder = (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
-        ->workdir('/var/www/project');
+        ->workdir('/var/www/app');
     
     if ($debug) {
         $builder->env([
             'MATE_DEBUG' => '1',
             'MATE_DEBUG_FILE' => '1',
-            'MATE_DEBUG_LOG_FILE' => '/var/www/project/mate_inner.log',
+            'MATE_DEBUG_LOG_FILE' => '/var/www/app/mate_inner.log',
         ]);
     }
     

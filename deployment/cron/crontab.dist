@@ -1,0 +1,5 @@
+# Crontab __APP_USER__
+# Installé via : sudo crontab -u __APP_USER__ __APP_DIR__/deployment/cron/crontab
+#
+# Exemple — adapte ou supprime selon les commandes récurrentes de ton application :
+# * * * * * cd __APP_DIR__/app && /usr/bin/php bin/console app:your-command --env=prod >> /var/log/cron/app-your-command.log 2>&1

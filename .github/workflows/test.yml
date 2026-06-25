@@ -7,12 +7,37 @@ on:
       - main
   pull_request:
     branches:
-      - *
+      - '*'
 
 jobs:
   validate-codebase:
     name: Validate codebase
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: main_test
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: app
+      DATABASE_PASSWORD: app
+      # config/packages/test/doctrine.yaml appends a "_test" suffix in the test env,
+      # so this base name must match the "main_test" database created by the postgres service above.
+      DATABASE_NAME: main
+
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -64,9 +89,17 @@ jobs:
         working-directory: tools
         run: PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer check
 
+      - name: Run migrations
+        working-directory: app
+        run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
+
       - name: Check Doctrine / DB scheme
         working-directory: app
-        run: php bin/console doctrine:schema:validate -v --skip-sync
+        run: php bin/console doctrine:schema:validate -v --skip-sync --env=test
+
+      - name: Load fixtures
+        working-directory: app
+        run: php bin/console hautelook:fixtures:load --no-interaction --env=test
 
       - name: Run PHPUnit
         working-directory: app

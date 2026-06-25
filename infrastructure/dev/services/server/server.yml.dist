@@ -9,7 +9,7 @@ services:
     depends_on:
       - database
     volumes:
-      - ../../app:/var/www/project
+      - ../../app:/var/www/app
       - ../../tools:/var/www/tools
 
 networks:

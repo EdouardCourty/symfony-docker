@@ -11,7 +11,7 @@ services:
     volumes:
       - ./configurations/nginx:/etc/nginx/conf.d
       - ./configurations/nginx/ssl:/etc/nginx/ssl
-      - ../../app/public:/var/www/project/public
+      - ../../app/public:/var/www/app/public
     depends_on:
       - server
       - database

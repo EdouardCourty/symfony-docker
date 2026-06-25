@@ -1,0 +1,46 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      pull_first:
+        description: "Pull le repo avant de déployer (recommandé si les scripts de déploiement ont été modifiés)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        env:
+          PULL_FIRST: ${{ inputs.pull_first }}
+          APP_DIR: ${{ secrets.APP_DIR }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            PULL_FIRST="$PULL_FIRST" APP_DIR="$APP_DIR" bash << 'EOF'
+          set -e
+          cd "${APP_DIR:-/var/www/app}"
+
+          if [ "$PULL_FIRST" = "true" ]; then
+            echo "Pull du repo (mise à jour des scripts de déploiement)..."
+            git pull origin main
+          fi
+
+          bash ./deployment/deploy.sh
+          EOF
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
