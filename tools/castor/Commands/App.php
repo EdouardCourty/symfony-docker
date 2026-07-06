@@ -19,6 +19,7 @@ function clear(): void
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console cache:clear');
 }
 
@@ -29,21 +30,25 @@ function reload(): void
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:database:drop --force --if-exists');
-    
+
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:database:create');
-    
+
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:migrations:migrate --no-interaction');
-    
+
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console hautelook:fixtures:load --no-interaction');
 }
 
@@ -53,21 +58,25 @@ function reload_tests(): void
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:database:drop --env=test --force --if-exists');
-    
+
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:database:create --env=test');
-    
+
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:migrations:migrate --env=test --no-interaction');
-    
+
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console hautelook:fixtures:load --env=test --no-interaction');
 }
 
@@ -77,6 +86,7 @@ function migrate(): void
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:migrations:migrate --no-interaction');
 }
 
@@ -86,6 +96,7 @@ function make_migration(): void
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console make:migration');
 }
 
@@ -95,6 +106,7 @@ function drop(): void
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:database:drop --force');
 }
 
@@ -104,6 +116,7 @@ function create(): void
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console doctrine:database:create');
 }
 
@@ -113,6 +126,7 @@ function load_fixtures(): void
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec('php bin/console hautelook:fixtures:load --no-interaction');
 }
 
@@ -124,6 +138,7 @@ function php_cs_fixer(): void
         ->withAllServices()
         ->service('server')
         ->workdir('/var/www/tools')
+        ->noTty()
         ->exec('vendor/bin/php-cs-fixer fix');
 }
 
@@ -134,6 +149,7 @@ function twig_cs_fixer(): void
         ->withAllServices()
         ->service('server')
         ->workdir('/var/www/tools')
+        ->noTty()
         ->exec('vendor/bin/twig-cs-fixer fix --config=.twig-cs-fixer.php /var/www/app/templates');
 }
 
@@ -153,6 +169,7 @@ function phpstan(
         ->withAllServices()
         ->service('server')
         ->workdir('/var/www/tools')
+        ->noTty()
         ->exec($command);
 }
 
@@ -178,6 +195,7 @@ function phpunit(
     (new DockerCommandBuilder())
         ->withAllServices()
         ->service('server')
+        ->noTty()
         ->exec($command);
 }
 
@@ -220,6 +238,7 @@ function install(
             ->withAllServices()
             ->service('server')
             ->workdir($targetFolder->getPath())
+            ->noTty()
             ->exec('composer install');
     }
 
@@ -305,7 +324,7 @@ function serve(
         ? 'vendor/bin/mate serve --force-keep-alive'
         : 'vendor/bin/mate serve --force-keep-alive 2>/dev/null';
     
-    $builder->noTty()->exec($command);
+    $builder->noTty()->forwardStdin()->exec($command);
 }
 
 #[AsTask(namespace: 'mate', description: 'List all available MCP tools')]

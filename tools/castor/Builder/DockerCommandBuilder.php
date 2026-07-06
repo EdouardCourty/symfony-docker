@@ -25,6 +25,7 @@ final class DockerCommandBuilder
     private bool $removeContainer = false;
     private bool $servicePorts = false;
     private bool $tty = true; // TTY enabled by default
+    private bool $forwardStdin = false;
     /** @var Service[] */
     private array $services = [];
     /** @var array<string, string> */
@@ -128,6 +129,18 @@ final class DockerCommandBuilder
     }
 
     /**
+     * Pipes the parent process's real STDIN into the child process without allocating a
+     * PTY (unlike tty/pty mode, this doesn't echo the input back onto stdout). Needed for
+     * long-lived processes that speak a line-delimited protocol over stdio, like an MCP server.
+     */
+    public function forwardStdin(bool $forward = true): self
+    {
+        $this->forwardStdin = $forward;
+
+        return $this;
+    }
+
+    /**
      * @param array<string, string> $env
      */
     public function env(array $env): self
@@ -162,7 +175,7 @@ final class DockerCommandBuilder
             $command .= ' ' . implode(' ', $serviceNames);
         }
 
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
         run($command, context: $context);
     }
 
@@ -174,7 +187,7 @@ final class DockerCommandBuilder
             $command .= ' --volumes';
         }
 
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
         run($command, context: $context);
     }
 
@@ -188,13 +201,13 @@ final class DockerCommandBuilder
             $command .= ' ' . implode(' ', $serviceNames);
         }
 
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
         run($command, context: $context);
     }
 
     public function build(): void
     {
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
         run($this->buildBaseCommand() . ' build', context: $context);
     }
 
@@ -216,7 +229,7 @@ final class DockerCommandBuilder
             }
         }
 
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
         run($command, context: $context);
     }
 
@@ -249,7 +262,11 @@ final class DockerCommandBuilder
             $command,
         );
 
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = match (true) {
+            $this->tty => context()->withTty(true),
+            $this->forwardStdin => context()->withInput(\STDIN),
+            default => context()->withPty(false),
+        };
 
         run($execCommand, context: $context);
     }
@@ -285,13 +302,13 @@ final class DockerCommandBuilder
             $command,
         );
 
-        $context = ($this->tty && !$detached) ? context()->withTty(true) : context();
+        $context = ($this->tty && !$detached) ? context()->withTty(true) : context()->withPty(false);
         run($runCommand, context: $context);
     }
 
     public function ps(): void
     {
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
         run($this->buildBaseCommand() . ' ps', context: $context);
     }
 
@@ -307,7 +324,7 @@ final class DockerCommandBuilder
             $command .= ' ' . $service;
         }
 
-        $context = $this->tty ? context()->withTty(true) : context();
+        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
         run($command, context: $context);
     }
 }

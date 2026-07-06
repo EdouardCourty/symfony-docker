@@ -18,7 +18,8 @@ function start(
 ): void {
     $builder = (new DockerCommandBuilder())
         ->detached()
-        ->removeOrphans();
+        ->removeOrphans()
+        ->noTty();
 
     if (empty($services)) {
         $builder->withAllServices();
@@ -34,7 +35,7 @@ function stop(
     #[AsArgument(description: 'Services to stop (database, server, proxy). Leave empty for all')]
     ?array $services = null,
 ): void {
-    $builder = new DockerCommandBuilder();
+    $builder = (new DockerCommandBuilder())->noTty();
 
     if (empty($services)) {
         $builder->withAllServices();
@@ -53,6 +54,7 @@ function down(
     (new DockerCommandBuilder())
         ->withAllServices()
         ->withVolumes($volumes)
+        ->noTty()
         ->down();
 }
 
@@ -61,7 +63,7 @@ function build(
     #[AsArgument(description: 'Services to build (database, server, proxy). Leave empty for all')]
     ?array $services = null,
 ): void {
-    $builder = new DockerCommandBuilder();
+    $builder = (new DockerCommandBuilder())->noTty();
 
     if (empty($services)) {
         $builder->withAllServices();
@@ -79,7 +81,7 @@ function restart(
     #[AsOption(description: 'Force recreate containers')]
     bool $forceRecreate = false,
 ): void {
-    $builder = new DockerCommandBuilder();
+    $builder = (new DockerCommandBuilder())->noTty();
 
     if (empty($services)) {
         $builder->withAllServices();
@@ -111,7 +113,7 @@ function bash(
 #[AsTask(namespace: 'docker', description: 'List Docker containers status', aliases: ['ps'])]
 function ps(): void
 {
-    (new DockerCommandBuilder())->withAllServices()->ps();
+    (new DockerCommandBuilder())->withAllServices()->noTty()->ps();
 }
 
 #[AsTask(namespace: 'docker', description: 'Show Docker container logs', aliases: ['logs'])]
@@ -121,5 +123,5 @@ function logs(
     #[AsOption(shortcut: 'f', description: 'Follow log output')]
     bool $follow = false,
 ): void {
-    (new DockerCommandBuilder())->withAllServices()->logs($service, $follow);
+    (new DockerCommandBuilder())->withAllServices()->noTty()->logs($service, $follow);
 }
