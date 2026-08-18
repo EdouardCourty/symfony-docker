@@ -1,4 +1,4 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.5-fpm-alpine
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -29,8 +29,7 @@ RUN docker-php-ext-install \
     bcmath \
     intl \
     curl \
-    gmp \
-    opcache
+    gmp
 
 RUN apk add --no-cache --virtual .production-deps $PHPIZE_DEPS
 

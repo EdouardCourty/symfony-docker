@@ -8,3 +8,4 @@ use function Castor\import;
 import(__DIR__ . '/tools/castor/Commands');
 import(__DIR__ . '/tools/castor/Builder');
 import(__DIR__ . '/tools/castor/Enum');
+import(__DIR__ . '/tools/castor/Support');

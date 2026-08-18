@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Utils\HasEnabledTrait;
 use App\Entity\Utils\HasTimestampTrait;
 use App\Entity\Utils\HasUuidTrait;
 use App\Exception\InvalidRoleException;
@@ -17,6 +18,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Table(name: 'app_user')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    use HasEnabledTrait;
     use HasTimestampTrait;
     use HasUuidTrait;
 
@@ -39,9 +41,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: Types::STRING)]
     private string $password;
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
-    private bool $enabled = true;
 
     public function __toString(): string
     {
@@ -129,21 +128,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->password = $password;
 
         return $this;
-    }
-
-    public function eraseCredentials(): void
-    {
-    }
-
-    public function setEnabled(bool $enabled): self
-    {
-        $this->enabled = $enabled;
-
-        return $this;
-    }
-
-    public function isEnabled(): bool
-    {
-        return $this->enabled;
     }
 }

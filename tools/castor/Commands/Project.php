@@ -91,27 +91,7 @@ function init(): void
     // Generate files from templates
     io()->section('Generating configuration files');
 
-    $templates = [
-        'infrastructure/dev/network.yml.dist' => 'infrastructure/dev/network.yml',
-        'infrastructure/dev/services/database/.env.dist' => 'infrastructure/dev/services/database/.env',
-        'infrastructure/dev/services/database/database.yml.dist' => 'infrastructure/dev/services/database/database.yml',
-        'infrastructure/dev/services/server/server.yml.dist' => 'infrastructure/dev/services/server/server.yml',
-        'infrastructure/dev/services/proxy/proxy.yml.dist' => 'infrastructure/dev/services/proxy/proxy.yml',
-        'infrastructure/dev/configurations/nginx/project_local.conf.dist' => 'infrastructure/dev/configurations/nginx/project_local.conf',
-    ];
-
-    foreach ($templates as $source => $destination) {
-        if (!file_exists($source)) {
-            io()->error("Template file not found: {$source}");
-            continue;
-        }
-
-        $content = file_get_contents($source);
-        $content = str_replace(array_keys($replacements), array_values($replacements), $content);
-        file_put_contents($destination, $content);
-
-        io()->success("✓ Generated {$destination}");
-    }
+    generateProjectFiles($replacements);
 
     io()->section('Generating SSL certificates');
     generate(hostname: $hostname, trust: true);
@@ -170,5 +150,37 @@ function hosts(
     run(['sudo', 'sh', '-c', "echo '{$entry}' >> {$hostsFile}"]);
 
     io()->success("{$hostname} added to {$hostsFile}.");
+}
+
+/**
+ * Generates the local (gitignored) infrastructure files from their .dist templates,
+ * replacing each `{{ placeholder }}` with the given value. Used both by "project:init"
+ * (first-time setup) and "worktree:create" (parallel, isolated Docker stacks).
+ *
+ * @param array<string, string> $replacements Map of "{{ placeholder }}" => value
+ */
+function generateProjectFiles(array $replacements): void
+{
+    $templates = [
+        'infrastructure/dev/network.yml.dist' => 'infrastructure/dev/network.yml',
+        'infrastructure/dev/services/database/.env.dist' => 'infrastructure/dev/services/database/.env',
+        'infrastructure/dev/services/database/database.yml.dist' => 'infrastructure/dev/services/database/database.yml',
+        'infrastructure/dev/services/server/server.yml.dist' => 'infrastructure/dev/services/server/server.yml',
+        'infrastructure/dev/services/proxy/proxy.yml.dist' => 'infrastructure/dev/services/proxy/proxy.yml',
+        'infrastructure/dev/configurations/nginx/project_local.conf.dist' => 'infrastructure/dev/configurations/nginx/project_local.conf',
+    ];
+
+    foreach ($templates as $source => $destination) {
+        if (!file_exists($source)) {
+            io()->error("Template file not found: {$source}");
+            continue;
+        }
+
+        $content = file_get_contents($source);
+        $content = str_replace(array_keys($replacements), array_values($replacements), $content);
+        file_put_contents($destination, $content);
+
+        io()->success("✓ Generated {$destination}");
+    }
 }
 

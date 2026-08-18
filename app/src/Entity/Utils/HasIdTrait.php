@@ -7,7 +7,7 @@ namespace App\Entity\Utils;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-trait HasIdTrait
+trait HasIdTrait // @phpstan-ignore trait.unused (template trait for entities without UUID)
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

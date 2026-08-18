@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tools\Castor\Builder;
 
+use Castor\Context;
 use Tools\Castor\Enum\Service;
 
 use function Castor\context;
@@ -157,6 +158,17 @@ final class DockerCommandBuilder
         return \sprintf('docker compose %s', implode(' ', $files));
     }
 
+    /**
+     * Castor's run() does not follow the PHP process's live getcwd()/chdir() — it defaults
+     * to the directory castor.php was booted from. Since this builder always uses paths
+     * relative to the current working directory (e.g. for worktree-scoped stacks), the
+     * working directory must be pinned explicitly on every context.
+     */
+    private function baseContext(): Context
+    {
+        return context()->withWorkingDirectory(\getcwd());
+    }
+
     public function up(): void
     {
         $command = $this->buildBaseCommand() . ' up';
@@ -175,7 +187,7 @@ final class DockerCommandBuilder
             $command .= ' ' . implode(' ', $serviceNames);
         }
 
-        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
+        $context = $this->tty ? $this->baseContext()->withTty(true) : $this->baseContext()->withPty(false);
         run($command, context: $context);
     }
 
@@ -187,7 +199,7 @@ final class DockerCommandBuilder
             $command .= ' --volumes';
         }
 
-        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
+        $context = $this->tty ? $this->baseContext()->withTty(true) : $this->baseContext()->withPty(false);
         run($command, context: $context);
     }
 
@@ -201,13 +213,13 @@ final class DockerCommandBuilder
             $command .= ' ' . implode(' ', $serviceNames);
         }
 
-        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
+        $context = $this->tty ? $this->baseContext()->withTty(true) : $this->baseContext()->withPty(false);
         run($command, context: $context);
     }
 
     public function build(): void
     {
-        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
+        $context = $this->tty ? $this->baseContext()->withTty(true) : $this->baseContext()->withPty(false);
         run($this->buildBaseCommand() . ' build', context: $context);
     }
 
@@ -229,7 +241,7 @@ final class DockerCommandBuilder
             }
         }
 
-        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
+        $context = $this->tty ? $this->baseContext()->withTty(true) : $this->baseContext()->withPty(false);
         run($command, context: $context);
     }
 
@@ -263,9 +275,9 @@ final class DockerCommandBuilder
         );
 
         $context = match (true) {
-            $this->tty => context()->withTty(true),
-            $this->forwardStdin => context()->withInput(\STDIN),
-            default => context()->withPty(false),
+            $this->tty => $this->baseContext()->withTty(true),
+            $this->forwardStdin => $this->baseContext()->withInput(\STDIN),
+            default => $this->baseContext()->withPty(false),
         };
 
         run($execCommand, context: $context);
@@ -302,13 +314,13 @@ final class DockerCommandBuilder
             $command,
         );
 
-        $context = ($this->tty && !$detached) ? context()->withTty(true) : context()->withPty(false);
+        $context = ($this->tty && !$detached) ? $this->baseContext()->withTty(true) : $this->baseContext()->withPty(false);
         run($runCommand, context: $context);
     }
 
     public function ps(): void
     {
-        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
+        $context = $this->tty ? $this->baseContext()->withTty(true) : $this->baseContext()->withPty(false);
         run($this->buildBaseCommand() . ' ps', context: $context);
     }
 
@@ -324,7 +336,7 @@ final class DockerCommandBuilder
             $command .= ' ' . $service;
         }
 
-        $context = $this->tty ? context()->withTty(true) : context()->withPty(false);
+        $context = $this->tty ? $this->baseContext()->withTty(true) : $this->baseContext()->withPty(false);
         run($command, context: $context);
     }
 }
