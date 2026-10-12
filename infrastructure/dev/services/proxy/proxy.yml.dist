@@ -2,7 +2,7 @@ name: {{ project_name }}
 
 services:
   proxy:
-    image: nginx:alpine3.18
+    image: nginx:alpine
     container_name: '{{ project_name }}_proxy'
     ports:
       - target: 443

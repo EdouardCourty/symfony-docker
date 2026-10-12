@@ -42,14 +42,14 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: 8.5
 
       - name: Initialise repository
         uses: actions/checkout@v4
 
       - name: Validate composer.json and composer.lock (app)
         working-directory: app
-        run: composer validate --strict
+        run: composer validate --strict --no-check-publish
 
       - name: Audit dependencies (app)
         working-directory: app
