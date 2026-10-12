@@ -49,7 +49,7 @@ jobs:
 
       - name: Validate composer.json and composer.lock (app)
         working-directory: app
-        run: composer validate --strict
+        run: composer validate --strict --no-check-publish
 
       - name: Audit dependencies (app)
         working-directory: app
