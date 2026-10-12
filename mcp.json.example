@@ -1,9 +1,0 @@
-{
-    "mcpServers": {
-        "symfony-ai-mate": {
-            "command": "castor",
-            "args": ["mate:serve"],
-            "cwd": "{{ absolute_path }}/app"
-        }
-    }
-}

@@ -89,18 +89,6 @@
             "config/routes/easyadmin.yaml"
         ]
     },
-    "friendsofphp/php-cs-fixer": {
-        "version": "3.66",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "3.0",
-            "ref": "be2103eb4a20942e28a6dd87736669b757132435"
-        },
-        "files": [
-            ".php-cs-fixer.dist.php"
-        ]
-    },
     "friendsofphp/proxy-manager-lts": {
         "version": "v1.0.7"
     },
@@ -141,30 +129,6 @@
     "nikic/php-parser": {
         "version": "v4.13.2"
     },
-    "php-http/discovery": {
-        "version": "1.20",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "1.18",
-            "ref": "f45b5dd173a27873ab19f5e3180b2f661c21de02"
-        },
-        "files": [
-            "config/packages/http_discovery.yaml"
-        ]
-    },
-    "phpstan/phpstan": {
-        "version": "1.10",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "1.0",
-            "ref": "5e490cc197fb6bb1ae22e5abbc531ddc633b6767"
-        },
-        "files": [
-            "phpstan.dist.neon"
-        ]
-    },
     "phpunit/phpunit": {
         "version": "10.1",
         "recipe": {
@@ -193,18 +157,6 @@
     },
     "roave/security-advisories": {
         "version": "dev-latest"
-    },
-    "squizlabs/php_codesniffer": {
-        "version": "3.6",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "master",
-            "version": "3.6",
-            "ref": "1019e5c08d4821cb9b77f4891f8e9c31ff20ac6f"
-        },
-        "files": [
-            "phpcs.xml.dist"
-        ]
     },
     "stof/doctrine-extensions-bundle": {
         "version": "1.7",
@@ -397,9 +349,6 @@
         "version": "v1.25.0"
     },
     "symfony/polyfill-mbstring": {
-        "version": "v1.25.0"
-    },
-    "symfony/polyfill-php80": {
         "version": "v1.25.0"
     },
     "symfony/polyfill-uuid": {

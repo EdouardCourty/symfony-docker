@@ -13,12 +13,6 @@
 !/data/pictures/.gitkeep
 /mysqldata
 ###< symfony/framework-bundle ###
-
-###> squizlabs/php_codesniffer ###
-/.phpcs-cache
-/phpcs.xml
-###< squizlabs/php_codesniffer ###
-
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
 /public/build/
@@ -36,15 +30,3 @@ yarn-error.log
 ###< phpunit/phpunit ###
 
 docker-compose.yml
-
-###> friendsofphp/php-cs-fixer ###
-/.php-cs-fixer.php
-/.php-cs-fixer.cache
-###< friendsofphp/php-cs-fixer ###
-
-###> symfony/ai-mate ###
-/mate/.env.local
-###< symfony/ai-mate ###
-
-mate_inner.log
-mate.log

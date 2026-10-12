@@ -1,7 +1,3 @@
 .castor.stub.php
 .idea
 .DS_Store
-
-# AI Mate MCP configuration (contains user-specific paths)
-mcp.json
-.mcp.json

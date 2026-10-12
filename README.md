@@ -9,7 +9,6 @@ This template provides:
 - **Docker-first development** - All commands run in containers for consistency
 - **Castor task runner** - Modern PHP task runner replacing Makefiles
 - **QA tools pre-configured** - PHPStan, PHP CS Fixer, PHPUnit ready to use
-- **AI Mate integration** - MCP server for AI assistants (Copilot, Claude, Cursor, etc.)
 - **AI-friendly documentation** - See `AGENTS.md` for coding agent guidelines
 
 ## 📁 Project Structure
@@ -35,7 +34,6 @@ symfony-docker/
 │
 ├── castor.php             # Castor entry point
 ├── AGENTS.md              # 🤖 Guidelines for AI coding agents
-├── AI_MATE_SETUP.md       # 🤖 Guidelines for using AI Mate (Symfony debug MCP server)
 └── README.md              # 👋 You are here
 ```
 
@@ -118,20 +116,6 @@ castor database:migrate          # Run migrations
 castor database:make-migration   # Create new migration
 ```
 
-### AI Mate (MCP Server for AI Assistants)
-
-```bash
-castor mate:setup       # Setup MCP config (run once)
-castor mate:serve       # Start MCP server
-castor mate:tools       # List available tools
-castor mate:capabilities  # Show all capabilities
-castor mate:call php-version '{}'  # Test a tool
-```
-
-**Quick setup:**
-1. Run `castor mate:setup` to create `mcp.json` with your project path
-2. Configure your AI assistant to use the MCP server
-
 ### Project Management
 
 ```bash
@@ -144,18 +128,18 @@ castor project:init          # (Re)initialize Docker configs
 ## 📚 Tech Stack
 
 ### Application
-- **PHP:** 8.4 (FPM Alpine)
-- **Symfony:** 7.x
+- **PHP:** 8.5 (FPM Alpine)
+- **Symfony:** 8.1
+- **EasyAdmin:** 5.x
 - **PostgreSQL:** 18 Alpine
-- **Nginx:** Alpine 3.18
+- **Nginx:** Alpine
 
 ### Development Tools
 - **Castor:** PHP task runner
-- **PHPStan:** Static analysis (level max)
+- **PHPStan:** Static analysis (level 8)
 - **PHP CS Fixer:** Code style fixer (PSR-12)
 - **PHPUnit:** Testing framework
 - **Docker Compose:** Container orchestration
-- **Symfony AI Mate:** MCP server for AI assistant integration
 
 ## 📖 Documentation
 

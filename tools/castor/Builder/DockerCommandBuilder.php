@@ -131,8 +131,7 @@ final class DockerCommandBuilder
 
     /**
      * Pipes the parent process's real STDIN into the child process without allocating a
-     * PTY (unlike tty/pty mode, this doesn't echo the input back onto stdout). Needed for
-     * long-lived processes that speak a line-delimited protocol over stdio, like an MCP server.
+     * PTY (unlike tty/pty mode, this doesn't echo the input back onto stdout).
      */
     public function forwardStdin(bool $forward = true): self
     {
