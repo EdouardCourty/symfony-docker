@@ -125,6 +125,18 @@ castor install tools         # Install only tools dependencies
 castor project:init          # (Re)initialize Docker configs
 ```
 
+### Worktrees
+
+Each worktree gets its own branch, Docker Compose project, network and ports, so several stacks run side by side.
+
+```bash
+castor worktree:create <name> --path=../<name> [--base=main] [--start]  # New worktree + isolated stack
+castor worktree:list                                                    # Registered worktrees, ports, status
+castor worktree:destroy <name> [--delete-branch] [--force]              # Remove stack (containers, volumes, network, images) + worktree
+```
+
+`<name>`: lowercase letters, digits, `-`, `_`. State lives in `.git/castor-worktrees.json`. `destroy` is stateless: the Docker stack is removed by Compose project name, even if the directory or registry entry is gone.
+
 ## 📚 Tech Stack
 
 ### Application

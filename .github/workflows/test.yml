@@ -45,7 +45,7 @@ jobs:
           php-version: 8.5
 
       - name: Initialise repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Validate composer.json and composer.lock (app)
         working-directory: app
@@ -57,7 +57,7 @@ jobs:
 
       - name: Cache Composer packages (app)
         id: composer-cache-app
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: app/vendor
           key: ${{ runner.os }}-php-app-${{ hashFiles('app/composer.lock') }}
@@ -70,7 +70,7 @@ jobs:
 
       - name: Cache Composer packages (tools)
         id: composer-cache-tools
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: tools/vendor
           key: ${{ runner.os }}-php-tools-${{ hashFiles('tools/composer.lock') }}

@@ -24,6 +24,8 @@ function worktree_create(
     #[AsOption(description: 'Start the full Docker stack once the worktree is scaffolded')]
     bool $start = false,
 ): void {
+    assertValidWorktreeName($name);
+
     if ($path === '') {
         throw new \InvalidArgumentException('The --path option is required.');
     }
@@ -141,43 +143,20 @@ function worktree_destroy(
     string $name,
     #[AsOption(description: 'Also delete the associated git branch')]
     bool $deleteBranch = false,
+    #[AsOption(description: 'Remove the worktree even if it has uncommitted changes (no confirmation)')]
+    bool $force = false,
 ): void {
+    assertValidWorktreeName($name);
+
     $registry = new WorktreeRegistry();
-    $entry = $registry->find($name);
-
-    if ($entry === null) {
-        throw new \InvalidArgumentException(\sprintf('No worktree named "%s" found in the registry.', $name));
-    }
-
-    $path = $entry['path'];
+    $target = resolveWorktreeTarget($name, $registry);
+    $path = $target['path'];
 
     io()->title(\sprintf('🔥 Destroying worktree "%s"', $name));
 
-    if (\is_dir($path)) {
-        io()->section('1/4 - Stopping the Docker stack');
-        $previousWorkingDirectory = \getcwd();
+    $forceRemove = $force;
 
-        if ($previousWorkingDirectory === false || \chdir($path) === false) {
-            throw new \RuntimeException(\sprintf('Could not switch to the worktree directory at "%s".', $path));
-        }
-
-        try {
-            (new DockerCommandBuilder())
-                ->withAllServices()
-                ->withVolumes(true)
-                ->noTty()
-                ->down();
-        } finally {
-            \chdir($previousWorkingDirectory);
-        }
-    } else {
-        io()->note('Worktree directory not found on disk — skipping Docker teardown.');
-    }
-
-    io()->section('2/4 - Removing the git worktree');
-    $forceRemove = false;
-
-    if (\is_dir($path) && worktreeHasUncommittedChanges($path)) {
+    if ($path !== null && \is_dir($path) && worktreeHasUncommittedChanges($path) && $forceRemove === false) {
         $forceRemove = io()->confirm(
             \sprintf('Worktree "%s" has uncommitted changes. Force removal anyway?', $name),
             false,
@@ -185,11 +164,22 @@ function worktree_destroy(
 
         if ($forceRemove === false) {
             io()->warning('Aborted — commit or discard the changes, then retry.');
+
             return;
         }
     }
 
-    if (worktreeIsRegistered($path)) {
+    io()->section('1/4 - Tearing down the Docker stack');
+    // Stateless: compose resolves the stack from its project label, so no compose file
+    // (nor the worktree directory) is needed. A project that does not exist is a no-op.
+    run([
+        'docker', 'compose', '-p', composeProjectName($target['projectName']),
+        'down', '--volumes', '--remove-orphans', '--rmi', 'local',
+    ]);
+
+    io()->section('2/4 - Removing the git worktree');
+
+    if ($path !== null && worktreeIsRegistered($path)) {
         $removeCommand = ['git', 'worktree', 'remove', $path];
 
         if ($forceRemove) {
@@ -198,7 +188,7 @@ function worktree_destroy(
 
         run($removeCommand);
     } else {
-        io()->note('Worktree already unregistered from git — skipping removal.');
+        io()->note('Worktree not known to git — skipping removal.');
     }
 
     io()->section('3/4 - Pruning stale worktree metadata');
@@ -206,12 +196,137 @@ function worktree_destroy(
 
     if ($deleteBranch) {
         io()->section('4/4 - Deleting the git branch');
-        run(['git', 'branch', '-D', $entry['branch']]);
+
+        if (worktreeBranchExists($target['branch'])) {
+            run(['git', 'branch', '-D', $target['branch']]);
+        } else {
+            io()->note(\sprintf('Branch "%s" not found — skipping.', $target['branch']));
+        }
     }
 
     $registry->remove($name);
 
     io()->success(\sprintf('✅ Worktree "%s" fully removed.', $name));
+}
+
+#[AsTask(namespace: 'worktree', name: 'list', description: 'List registered worktrees with their ports and Docker status')]
+function worktree_list(): void
+{
+    $entries = (new WorktreeRegistry())->all();
+
+    if ($entries === []) {
+        io()->note('No worktree registered.');
+
+        return;
+    }
+
+    $rows = [];
+
+    foreach ($entries as $entry) {
+        $running = countRunningContainers(composeProjectName($entry['projectName']));
+
+        $rows[] = [
+            $entry['name'],
+            $entry['branch'],
+            $entry['path'],
+            \sprintf('nginx %d / postgres %d', $entry['ports']['nginx'], $entry['ports']['postgres']),
+            \is_dir($entry['path']) ? \sprintf('%d container(s) running', $running) : 'directory missing',
+        ];
+    }
+
+    io()->table(['Name', 'Branch', 'Path', 'Ports', 'Status'], $rows);
+}
+
+function assertValidWorktreeName(string $name): void
+{
+    // The name ends up in the Docker Compose project name, which only accepts these characters.
+    if (\preg_match('/^[a-z0-9][a-z0-9_-]*$/', $name) !== 1) {
+        throw new \InvalidArgumentException(\sprintf(
+            'Invalid worktree name "%s": use lowercase letters, digits, "-" and "_" only.',
+            $name,
+        ));
+    }
+}
+
+function composeProjectName(string $projectName): string
+{
+    return \strtolower($projectName);
+}
+
+function countRunningContainers(string $composeProject): int
+{
+    \exec(\sprintf(
+        'docker ps --quiet --filter %s 2>/dev/null',
+        \escapeshellarg('label=com.docker.compose.project=' . $composeProject),
+    ), $output);
+
+    return \count($output);
+}
+
+/**
+ * Resolves what to tear down from the registry, falling back to git and to the naming
+ * convention so a worktree can still be destroyed when its registry entry or directory is gone.
+ *
+ * @return array{path: ?string, branch: string, projectName: string}
+ */
+function resolveWorktreeTarget(string $name, WorktreeRegistry $registry): array
+{
+    $entry = $registry->find($name);
+
+    if ($entry !== null) {
+        return ['path' => $entry['path'], 'branch' => $entry['branch'], 'projectName' => $entry['projectName']];
+    }
+
+    io()->note(\sprintf('No registry entry for "%s" — falling back to git and naming conventions.', $name));
+
+    $worktrees = listGitWorktrees();
+    $path = null;
+    $branch = $name;
+
+    foreach (\array_slice($worktrees, 1) as $worktree) {
+        if ($worktree['branch'] === $name || \basename($worktree['path']) === $name) {
+            $path = $worktree['path'];
+            $branch = $worktree['branch'] ?? $name;
+            break;
+        }
+    }
+
+    $networkFile = $path !== null ? $path . '/infrastructure/dev/network.yml' : null;
+
+    if ($networkFile !== null && \file_exists($networkFile)) {
+        $projectName = extractYamlScalar((string) \file_get_contents($networkFile), 'name');
+    } else {
+        // The first listed worktree is always the main checkout, whose project name has no suffix.
+        $mainNetworkFile = $worktrees[0]['path'] . '/infrastructure/dev/network.yml';
+
+        if (\file_exists($mainNetworkFile) === false) {
+            throw new \RuntimeException('Cannot derive the Docker project name: the main checkout has not been initialized.');
+        }
+
+        $projectName = \sprintf('%s_%s', extractYamlScalar((string) \file_get_contents($mainNetworkFile), 'name'), $name);
+    }
+
+    return ['path' => $path, 'branch' => $branch, 'projectName' => $projectName];
+}
+
+/**
+ * @return array<int, array{path: string, branch: ?string}>
+ */
+function listGitWorktrees(): array
+{
+    \exec('git worktree list --porcelain', $output);
+
+    $worktrees = [];
+
+    foreach ($output as $line) {
+        if (\str_starts_with($line, 'worktree ')) {
+            $worktrees[] = ['path' => \substr($line, \strlen('worktree ')), 'branch' => null];
+        } elseif (\str_starts_with($line, 'branch refs/heads/') && $worktrees !== []) {
+            $worktrees[\array_key_last($worktrees)]['branch'] = \substr($line, \strlen('branch refs/heads/'));
+        }
+    }
+
+    return $worktrees;
 }
 
 /**
