@@ -88,6 +88,13 @@ castor app:phpunit [path]   # Run tests (optional: specific file or --filter)
 castor app:qa               # Run all QA checks (phpcs + phpstan + phpunit)
 ```
 
+**Worktrees (isolated branch + Docker stack + ports):**
+```bash
+castor worktree:create <name> --path=<dir> [--start]  # name: [a-z0-9_-]
+castor worktree:list
+castor worktree:destroy <name> [--delete-branch] [--force]  # tears down Docker stack, then git worktree
+```
+
 **Database:**
 ```bash
 castor database:reload           # Drop, create, migrate, load fixtures
@@ -103,6 +110,7 @@ Commands are organized by namespace in `tools/castor/Commands/`:
 - **`App.php`** - Application commands (`app:*`, `cache:*`, quality tools)
 - **`Docker.php`** - Docker management (`docker:*`, `bash`)
 - **`Project.php`** - Project initialization (`project:init`)
+- **`Worktree.php`** - Worktree management (`worktree:*`)
 
 **Example command:**
 ```php
