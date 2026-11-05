@@ -126,7 +126,7 @@ function reset(): void
     io()->success('✅ Stack is up and ready!');
 }
 
-#[AsTask(namespace: 'project', description: 'Add a hostname to /etc/hosts (requires sudo)')]
+#[AsTask(namespace: 'project', description: 'Add a hostname to /etc/hosts, in IPv4 and IPv6 (requires sudo)')]
 function hosts(
     #[AsOption(description: 'Hostname to add')]
     ?string $hostname = null,
@@ -136,20 +136,32 @@ function hosts(
     }
 
     $hostsFile = '/etc/hosts';
-    $entry = "127.0.0.1 {$hostname}";
+    $lines = \preg_split('/\R/', (string) \file_get_contents($hostsFile)) ?: [];
 
-    $contents = \file_get_contents($hostsFile);
+    // Both families are declared: with IPv4 only, the resolver still asks for an IPv6 address and, on a
+    // ".local" name, waits for the multicast DNS timeout (about 5 s) before every first request.
+    foreach (['127.0.0.1', '::1'] as $address) {
+        // An entry counts only when a non-comment line maps exactly this name to this address.
+        $known = \array_filter($lines, static function (string $line) use ($hostname, $address): bool {
+            $fields = \preg_split('/\s+/', \trim($line)) ?: [];
 
-    if (\str_contains($contents, $hostname)) {
-        io()->success("{$hostname} is already in {$hostsFile} — nothing to do.");
-        return;
+            return !\str_starts_with(\trim($line), '#')
+                && ($fields[0] ?? '') === $address
+                && \in_array($hostname, \array_slice($fields, 1), true);
+        });
+
+        if ($known !== []) {
+            io()->success("{$address} {$hostname} is already in {$hostsFile} — nothing to do.");
+            continue;
+        }
+
+        $entry = "{$address} {$hostname}";
+        io()->writeln("Adding <info>{$entry}</info> to {$hostsFile}...");
+
+        run(['sudo', 'sh', '-c', "echo '{$entry}' >> {$hostsFile}"]);
+
+        io()->success("{$entry} added to {$hostsFile}.");
     }
-
-    io()->writeln("Adding <info>{$entry}</info> to {$hostsFile}...");
-
-    run(['sudo', 'sh', '-c', "echo '{$entry}' >> {$hostsFile}"]);
-
-    io()->success("{$hostname} added to {$hostsFile}.");
 }
 
 /**
